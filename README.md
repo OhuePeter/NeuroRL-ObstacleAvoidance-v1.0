@@ -50,3 +50,15 @@ tests/
 conda env create -f environment.yml
 conda activate neurorl
 pip install -r requirements.txt
+
+
+## Funding
+
+This work was undertaken thanks in part to funding from the Connected Minds Program, supported by the Canada First Research Excellence Fund (CFREF), Grant #CFREF-2022-00010.
+
+## Institutional Affiliation
+
+Centre for Neuroscience Studies
+Queen's University, Kingston, Ontario, Canada
+
+This repository was developed within the CompSci Lab at Queen's University.
