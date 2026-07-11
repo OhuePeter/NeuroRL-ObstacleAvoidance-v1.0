@@ -38,6 +38,12 @@ The perturbation is therefore unexpected and never learned during training.
 
 ---
 
+## Scientific Motivation
+
+This protocol is inspired by biological motor-control experiments in which unexpected perturbations are introduced after a movement has been initiated.
+
+Rather than studying how an agent learns perturbations, the framework investigates how a trained controller adapts online, enabling direct analysis of behavioural adaptation and neural population dynamics.
+
 # Central Hypothesis
 
 Unexpected perturbations will transiently alter both the behavioural trajectory and the internal neural population state of the trained controller.
@@ -47,12 +53,6 @@ Although the policy has never experienced perturbations during training, success
 Comparisons with the unperturbed reference condition will identify how adaptive behaviour emerges from changes in the latent neural representations.
 
 ---
-
-## Scientific Motivation
-
-This protocol mimics biological motor control experiments in which unexpected perturbations are introduced after a motor plan has been formed.
-
-The objective is to study behavioural adaptation and neural population dynamics rather than perturbation learning.
 
 ---
 
