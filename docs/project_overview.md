@@ -1,9 +1,17 @@
-# Project Vision
+# Project Overview
 
-NeuroRL-ObstacleAvoidance-v1.0 is a computational neuroscience platform for investigating how neural population dynamics emerge in reinforcement learning agents performing goal-directed obstacle avoidance.
+NeuroRL-ObstacleAvoidance-v1.0 investigates how neural population dynamics emerge in reinforcement learning agents performing adaptive obstacle avoidance.
 
-The framework separates learning from adaptation by training the policy without perturbations and introducing unexpected perturbations only during evaluation.
+Unlike previous versions, perturbations are introduced only during evaluation.
 
-This design enables quantitative analysis of behavioural adaptation, latent neural representations, and neural population dynamics using methods inspired by systems neuroscience.
+The framework is inspired by computational neuroscience and biological motor control.
 
-The long-term objective is to bridge reinforcement learning, computational neuroscience, and rehabilitation robotics through reproducible, interpretable, and biologically inspired computational models.
+The project integrates
+
+- Reinforcement Learning
+- Neural Population Analysis
+- Behavioural Analysis
+- Statistical Analysis
+- Scientific Visualization
+
+The long-term objective is to bridge computational neuroscience, rehabilitation, and robotics.
