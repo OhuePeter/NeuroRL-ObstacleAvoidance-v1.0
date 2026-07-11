@@ -5,12 +5,14 @@ title: NeuroRL-ObstacleAvoidance-v1.0
 message: >
   If you use this software, please cite the accompanying manuscript.
 
-authors:
-
 ## Authors
 
-- Peter Ohue
-- Gunnar Blom
+authors:
+  - family-names: Ohue
+    given-names: Peter
+
+  - family-names: Blohm
+    given-names: Gunnar
 
 version: 1.0.0
 
