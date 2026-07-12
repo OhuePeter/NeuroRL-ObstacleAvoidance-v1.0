@@ -11,7 +11,7 @@ Description
 Main Gymnasium environment for NeuroRL Obstacle Avoidance.
 
 Version:
-1.0
+1.1
 ==========================================================
 """
 
@@ -37,9 +37,9 @@ class NeuroRLEnvironment(gym.Env):
 
         super().__init__()
 
-        # ---------------------------------
+        # --------------------------------------------------
         # Core Components
-        # ---------------------------------
+        # --------------------------------------------------
 
         self.world = World()
 
@@ -54,21 +54,22 @@ class NeuroRLEnvironment(gym.Env):
 
         self.observation_builder = ObservationBuilder()
 
-        # ---------------------------------
+        # --------------------------------------------------
         # Environment Parameters
-        # ---------------------------------
+        # --------------------------------------------------
 
         self.dt = 0.05
 
-        self.max_steps = 400
+        # Reduced from 400 to improve training speed
+        self.max_steps = 200
 
         self.current_step = 0
 
         self.previous_goal_distance = None
 
-        # ---------------------------------
+        # --------------------------------------------------
         # Observation Space
-        # ---------------------------------
+        # --------------------------------------------------
 
         self.observation_space = spaces.Box(
             low=-np.inf,
@@ -77,9 +78,9 @@ class NeuroRLEnvironment(gym.Env):
             dtype=np.float32
         )
 
-        # ---------------------------------
+        # --------------------------------------------------
         # Action Space
-        # ---------------------------------
+        # --------------------------------------------------
 
         self.action_space = spaces.Box(
             low=-1.0,
@@ -111,11 +112,19 @@ class NeuroRLEnvironment(gym.Env):
 
         self.current_step += 1
 
+        # --------------------------------------------------
+        # Physics Update
+        # --------------------------------------------------
+
         self.physics.update(
             self.world.agent,
             action,
             self.dt
         )
+
+        # --------------------------------------------------
+        # Distances
+        # --------------------------------------------------
 
         current_goal_distance = self.physics.distance(
             self.world.agent.position,
@@ -132,6 +141,10 @@ class NeuroRLEnvironment(gym.Env):
             self.world.obstacles[1].position
         )
 
+        # --------------------------------------------------
+        # Status
+        # --------------------------------------------------
+
         collision = self.physics.collision(
             self.world.agent,
             self.world.obstacles
@@ -141,6 +154,10 @@ class NeuroRLEnvironment(gym.Env):
             self.world.agent,
             self.world.goal
         )
+
+        # --------------------------------------------------
+        # Reward
+        # --------------------------------------------------
 
         reward = self.reward_function.compute_total_reward(
 
@@ -162,6 +179,10 @@ class NeuroRLEnvironment(gym.Env):
             ay=self.world.agent.ay
 
         )
+
+        # --------------------------------------------------
+        # Logging
+        # --------------------------------------------------
 
         self.logger.log(
 
@@ -197,13 +218,46 @@ class NeuroRLEnvironment(gym.Env):
 
         self.previous_goal_distance = current_goal_distance
 
-        observation = self.observation_builder.build(self.world)
+        observation = self.observation_builder.build(
+            self.world
+        )
 
         terminated = goal_reached or collision
 
         truncated = self.current_step >= self.max_steps
 
-        info = reward
+        # --------------------------------------------------
+        # Information returned to PPO / Evaluator
+        # --------------------------------------------------
+
+        info = {
+
+            # Episode status
+
+            "goal_reached": goal_reached,
+            "collision": collision,
+
+            # Reward components
+
+            "total_reward": reward["total"],
+            "goal_reward": reward["goal"],
+            "collision_penalty": reward["collision"],
+            "progress_reward": reward["progress"],
+            "smoothness_reward": reward["smoothness"],
+            "time_penalty": reward["time"],
+            "clearance_reward": reward["clearance"],
+
+            # Distances
+
+            "goal_distance": current_goal_distance,
+            "obstacle1_distance": obstacle1_distance,
+            "obstacle2_distance": obstacle2_distance,
+
+            # Current step
+
+            "step": self.current_step
+
+        }
 
         return (
             observation,
