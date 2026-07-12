@@ -1,38 +1,57 @@
-from src.environment.world import World
+"""
+==========================================================
+Environment Test
+
+Authors:
+Peter Ohue
+Gunnar Blohm
+==========================================================
+"""
+
+import numpy as np
+
+from src.environment.environment import NeuroRLEnvironment
 
 
 def main():
 
-    world = World()
+    env = NeuroRLEnvironment()
 
-    print("=" * 40)
+    observation, info = env.reset()
 
-    print("World Created")
+    print("=" * 60)
+    print("INITIAL OBSERVATION")
+    print("=" * 60)
 
-    print("=" * 40)
-
-    print()
-
-    print("Agent")
-
-    print(world.agent.position)
+    print(observation)
 
     print()
 
-    print("Goal")
+    for step in range(10):
 
-    print(world.goal.position)
+        action = np.array([0.0, 1.0], dtype=np.float32)
 
-    print()
+        observation, reward, terminated, truncated, info = env.step(action)
 
-    print("Obstacles")
+        print(f"Step {step+1:02d}")
 
-    for obstacle in world.obstacles:
-        print(obstacle.position)
+        print(f"Reward      : {reward:.3f}")
 
-    print()
+        print(f"Position    : ({observation[0]:.2f}, {observation[1]:.2f})")
 
-    print("Environment initialized successfully.")
+        print(f"Goal Dist.  : {info['progress']:.3f}")
+
+        print()
+
+        if terminated or truncated:
+
+            break
+
+    print("=" * 60)
+
+    print("Environment working successfully.")
+
+    env.logger.save("environment_test.csv")
 
 
 if __name__ == "__main__":
