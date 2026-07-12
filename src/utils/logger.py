@@ -8,7 +8,7 @@ Gunnar Blohm
 
 Description
 -----------
-Records behavioural, experimental and (later) neural
+Logs behavioural, experimental and (later) neural
 data for every simulation timestep.
 
 Version:
@@ -16,8 +16,8 @@ Version:
 ==========================================================
 """
 
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 
@@ -48,6 +48,9 @@ class ExperimentLogger:
         collision=False,
         route="Unknown"
     ):
+        """
+        Record one timestep of behavioural data.
+        """
 
         self.records.append({
 
@@ -59,11 +62,9 @@ class ExperimentLogger:
             "trial": trial,
             "step": step,
             "time": time,
-
             "timestamp": datetime.now(),
 
             "seed": seed,
-
             "condition": condition,
 
             # -----------------------------
@@ -76,7 +77,7 @@ class ExperimentLogger:
             "vx": agent.vx,
             "vy": agent.vy,
 
-            "speed": (agent.vx**2 + agent.vy**2)**0.5,
+            "speed": (agent.vx ** 2 + agent.vy ** 2) ** 0.5,
 
             "ax": agent.ax,
             "ay": agent.ay,
@@ -88,37 +89,47 @@ class ExperimentLogger:
             # -----------------------------
 
             "goal_distance": goal_distance,
-
             "obstacle1_distance": obstacle1_distance,
-
             "obstacle2_distance": obstacle2_distance,
 
             # -----------------------------
-            # Experiment Outcome
+            # Outcome
             # -----------------------------
 
             "reward": reward,
-
             "collision": collision,
-
             "success": success,
-
             "route": route
 
         })
 
     def dataframe(self):
-
+        """
+        Return logged data as a pandas DataFrame.
+        """
         return pd.DataFrame(self.records)
 
-    def save(self, filename):
+    def save(self, filepath):
+        """
+        Save behavioural data.
 
-        output = Path("data/raw")
+        Parameters
+        ----------
+        filepath : pathlib.Path
+            Full path to behaviour.csv
+        """
 
-        output.mkdir(parents=True, exist_ok=True)
+        filepath = Path(filepath)
 
-        filepath = output / filename
+        filepath.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
 
-        self.dataframe().to_csv(filepath, index=False)
+        self.dataframe().to_csv(
+            filepath,
+            index=False
+        )
 
-        print(f"\nSaved log to:\n{filepath}")
+        print("\nBehaviour saved to:")
+        print(filepath)
