@@ -8,11 +8,11 @@ Gunnar Blohm
 
 Description
 -----------
-Evaluates a trained PPO policy in the nominal (P0)
-environment and saves behavioural data.
+Evaluates a trained PPO policy and saves
+episode trajectories and behavioural metrics.
 
 Version:
-1.1
+1.3
 ==========================================================
 """
 
@@ -29,7 +29,7 @@ from src.evaluation.metrics import BehaviourMetrics
 
 class PolicyEvaluator:
     """
-    Evaluate a trained policy.
+    Evaluate a trained PPO policy.
     """
 
     def __init__(self, model_path):
@@ -50,6 +50,9 @@ class PolicyEvaluator:
         )
 
         summary = []
+
+        successes = 0
+        collisions = 0
 
         for episode in range(episodes):
 
@@ -81,10 +84,15 @@ class PolicyEvaluator:
                     agent.y
                 ])
 
+                speed = self.env.physics.speed(agent)
+
                 kinematics.append([
                     info["step"],
+                    agent.x,
+                    agent.y,
                     agent.vx,
                     agent.vy,
+                    speed,
                     agent.ax,
                     agent.ay,
                     agent.heading,
@@ -94,67 +102,47 @@ class PolicyEvaluator:
 
             trajectory = np.asarray(trajectory)
 
-            trajectory_df = pd.DataFrame(
-
+            pd.DataFrame(
                 trajectory,
-
                 columns=[
                     "x",
                     "y"
                 ]
-
-            )
-
-            trajectory_df.to_csv(
-
-                output_dir /
-                f"trajectory_{episode:03d}.csv",
-
+            ).to_csv(
+                output_dir / f"trajectory_{episode:03d}.csv",
                 index=False
-
             )
 
             kinematics_df = pd.DataFrame(
-
                 kinematics,
-
                 columns=[
-
                     "step",
-
+                    "x",
+                    "y",
                     "vx",
-
                     "vy",
-
+                    "speed",
                     "ax",
-
                     "ay",
-
                     "heading",
-
                     "goal_distance",
-
                     "reward"
-
                 ]
-
             )
 
             kinematics_df.to_csv(
-
-                output_dir /
-                f"kinematics_{episode:03d}.csv",
-
+                output_dir / f"kinematics_{episode:03d}.csv",
                 index=False
-
             )
 
-            speeds = np.sqrt(
+            success = info["goal_reached"]
+            collision = info["collision"]
 
-                kinematics_df["vx"]**2 +
-                kinematics_df["vy"]**2
+            if success:
+                successes += 1
 
-            )
+            if collision:
+                collisions += 1
 
             summary.append({
 
@@ -162,52 +150,101 @@ class PolicyEvaluator:
 
                 "reward": total_reward,
 
-                "success": info["goal_reached"],
+                "success": success,
 
-                "collision": info["collision"],
+                "collision": collision,
 
                 "steps": len(trajectory),
 
-                "path_length":
+                "path_length": BehaviourMetrics.path_length(
+                    trajectory
+                ),
 
-                    BehaviourMetrics.path_length(
-                        trajectory
-                    ),
+                "mean_speed": BehaviourMetrics.mean_speed(
+                    kinematics_df["speed"]
+                ),
 
-                "mean_speed":
-
-                    BehaviourMetrics.mean_speed(
-                        speeds
-                    ),
-
-                "max_speed":
-
-                    BehaviourMetrics.max_speed(
-                        speeds
-                    )
+                "max_speed": BehaviourMetrics.max_speed(
+                    kinematics_df["speed"]
+                )
 
             })
+
+            print("\n" + "=" * 60)
+            print(f"EPISODE {episode:02d}")
+            print("=" * 60)
+
+            print(
+                f"Start Position : "
+                f"({agent.start_x:.3f}, {agent.start_y:.3f})"
+            )
+
+            print(
+                f"Final Position : "
+                f"({agent.x:.3f}, {agent.y:.3f})"
+            )
+
+            print(
+                f"Goal Position  : "
+                f"({self.env.world.goal.x:.3f}, {self.env.world.goal.y:.3f})"
+            )
+
+            print(
+                f"Goal Distance  : "
+                f"{info['goal_distance']:.3f}"
+            )
+
+            print(
+                f"Steps          : "
+                f"{len(trajectory)}"
+            )
+
+            print(
+                f"Total Reward   : "
+                f"{total_reward:.3f}"
+            )
+
+            print(
+                f"Success        : "
+                f"{success}"
+            )
+
+            print(
+                f"Collision      : "
+                f"{collision}"
+            )
+
+            print(
+                f"Final Velocity : "
+                f"({agent.vx:.3f}, {agent.vy:.3f})"
+            )
+
+            print(
+                f"Heading        : "
+                f"{agent.heading:.3f} rad"
+            )
 
         summary_df = pd.DataFrame(summary)
 
         summary_df.to_csv(
-
             output_dir / "summary.csv",
-
             index=False
-
         )
 
-        print()
-
+        print("\n" + "=" * 60)
+        print("EVALUATION SUMMARY")
         print("=" * 60)
-        print("EVALUATION COMPLETE")
-        print("=" * 60)
-
-        print()
 
         print(summary_df)
 
-        print()
+        print("\nOverall Statistics")
+        print("------------------------------")
+        print(f"Episodes        : {episodes}")
+        print(f"Successes       : {successes}")
+        print(f"Success Rate    : {100 * successes / episodes:.1f}%")
+        print(f"Collisions      : {collisions}")
+        print(f"Collision Rate  : {100 * collisions / episodes:.1f}%")
+        print(f"Average Reward  : {summary_df['reward'].mean():.2f}")
+        print(f"Average Steps   : {summary_df['steps'].mean():.1f}")
 
-        print(f"Results saved to:\n{output_dir}")
+        print(f"\nResults saved to:\n{output_dir}")

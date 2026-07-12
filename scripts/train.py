@@ -25,7 +25,7 @@ def main():
 
     trainer.train(
 
-        total_timesteps=50000
+        total_timesteps=500000
 
     )
 
