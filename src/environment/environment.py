@@ -6,6 +6,10 @@ Authors:
 Peter Ohue
 Gunnar Blohm
 
+Description
+-----------
+Main Gymnasium environment for NeuroRL Obstacle Avoidance.
+
 Version:
 1.0
 ==========================================================
@@ -13,12 +17,12 @@ Version:
 
 import gymnasium as gym
 import numpy as np
-
 from gymnasium import spaces
 
 from src.environment.world import World
 from src.environment.physics import PhysicsEngine
 from src.environment.reward import RewardFunction
+from src.environment.observation import ObservationBuilder
 from src.utils.logger import ExperimentLogger
 
 
@@ -33,6 +37,10 @@ class NeuroRLEnvironment(gym.Env):
 
         super().__init__()
 
+        # ---------------------------------
+        # Core Components
+        # ---------------------------------
+
         self.world = World()
 
         self.physics = PhysicsEngine(
@@ -44,6 +52,12 @@ class NeuroRLEnvironment(gym.Env):
 
         self.logger = ExperimentLogger()
 
+        self.observation_builder = ObservationBuilder()
+
+        # ---------------------------------
+        # Environment Parameters
+        # ---------------------------------
+
         self.dt = 0.05
 
         self.max_steps = 400
@@ -52,36 +66,26 @@ class NeuroRLEnvironment(gym.Env):
 
         self.previous_goal_distance = None
 
-        # -------------------------------------------------
+        # ---------------------------------
         # Observation Space
-        # -------------------------------------------------
+        # ---------------------------------
 
         self.observation_space = spaces.Box(
-
             low=-np.inf,
-
             high=np.inf,
-
-            shape=(10,),
-
+            shape=(12,),
             dtype=np.float32
-
         )
 
-        # -------------------------------------------------
+        # ---------------------------------
         # Action Space
-        # -------------------------------------------------
+        # ---------------------------------
 
         self.action_space = spaces.Box(
-
             low=-1.0,
-
             high=1.0,
-
             shape=(2,),
-
             dtype=np.float32
-
         )
 
     def reset(self, seed=None, options=None):
@@ -93,14 +97,11 @@ class NeuroRLEnvironment(gym.Env):
         self.current_step = 0
 
         self.previous_goal_distance = self.physics.distance(
-
             self.world.agent.position,
-
             self.world.goal.position
-
         )
 
-        observation = self._get_observation()
+        observation = self.observation_builder.build(self.world)
 
         info = {}
 
@@ -111,53 +112,34 @@ class NeuroRLEnvironment(gym.Env):
         self.current_step += 1
 
         self.physics.update(
-
             self.world.agent,
-
             action,
-
             self.dt
-
         )
 
         current_goal_distance = self.physics.distance(
-
             self.world.agent.position,
-
             self.world.goal.position
-
         )
 
         obstacle1_distance = self.physics.distance(
-
             self.world.agent.position,
-
             self.world.obstacles[0].position
-
         )
 
         obstacle2_distance = self.physics.distance(
-
             self.world.agent.position,
-
             self.world.obstacles[1].position
-
         )
 
         collision = self.physics.collision(
-
             self.world.agent,
-
             self.world.obstacles
-
         )
 
         goal_reached = self.physics.goal_reached(
-
             self.world.agent,
-
             self.world.goal
-
         )
 
         reward = self.reward_function.compute_total_reward(
@@ -167,11 +149,8 @@ class NeuroRLEnvironment(gym.Env):
             current_goal_distance=current_goal_distance,
 
             minimum_obstacle_distance=min(
-
                 obstacle1_distance,
-
                 obstacle2_distance
-
             ),
 
             goal_reached=goal_reached,
@@ -218,58 +197,24 @@ class NeuroRLEnvironment(gym.Env):
 
         self.previous_goal_distance = current_goal_distance
 
+        observation = self.observation_builder.build(self.world)
+
         terminated = goal_reached or collision
 
         truncated = self.current_step >= self.max_steps
 
-        observation = self._get_observation()
-
         info = reward
 
         return (
-
             observation,
-
             reward["total"],
-
             terminated,
-
             truncated,
-
             info
-
         )
 
-    def _get_observation(self):
-
-        return np.array([
-
-            self.world.agent.x,
-
-            self.world.agent.y,
-
-            self.world.agent.vx,
-
-            self.world.agent.vy,
-
-            self.world.goal.x,
-
-            self.world.goal.y,
-
-            self.world.obstacles[0].x,
-
-            self.world.obstacles[0].y,
-
-            self.world.obstacles[1].x,
-
-            self.world.obstacles[1].y
-
-        ], dtype=np.float32)
-
     def render(self):
-
         pass
 
     def close(self):
-
         pass
