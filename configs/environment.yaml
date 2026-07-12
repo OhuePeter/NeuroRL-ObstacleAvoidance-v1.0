@@ -20,12 +20,13 @@ goal:
 obstacles:
 
   number: 2
+
   radius: 0.50
 
   positions:
 
-    - [5.0, 4.0]
-    - [5.0, 6.0]
+    - [4.25, 5.0]
+    - [5.75, 5.0]
 
 training:
 
