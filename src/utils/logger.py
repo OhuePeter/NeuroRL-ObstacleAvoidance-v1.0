@@ -8,7 +8,8 @@ Gunnar Blohm
 
 Description
 -----------
-Logs behavioural and neural data for every timestep.
+Records behavioural, experimental and (later) neural
+data for every simulation timestep.
 
 Version:
 1.0
@@ -16,14 +17,14 @@ Version:
 """
 
 from pathlib import Path
+from datetime import datetime
+
 import pandas as pd
 
 
 class ExperimentLogger:
     """
-    Logs experiment data.
-
-    Each row corresponds to one simulation timestep.
+    Records one row of data for every simulation timestep.
     """
 
     def __init__(self):
@@ -33,28 +34,41 @@ class ExperimentLogger:
     def log(
         self,
         episode,
+        trial,
         step,
         time,
+        seed,
+        condition,
         agent,
         goal_distance,
         obstacle1_distance,
         obstacle2_distance,
-        perturbation="P0",
         reward=0.0,
         success=False,
         collision=False,
+        route="Unknown"
     ):
-        """
-        Record one timestep.
-        """
 
         self.records.append({
 
+            # -----------------------------
+            # Experiment Information
+            # -----------------------------
+
             "episode": episode,
-
+            "trial": trial,
             "step": step,
-
             "time": time,
+
+            "timestamp": datetime.now(),
+
+            "seed": seed,
+
+            "condition": condition,
+
+            # -----------------------------
+            # Behaviour
+            # -----------------------------
 
             "x": agent.x,
             "y": agent.y,
@@ -69,38 +83,41 @@ class ExperimentLogger:
 
             "heading": agent.heading,
 
+            # -----------------------------
+            # Distances
+            # -----------------------------
+
             "goal_distance": goal_distance,
 
             "obstacle1_distance": obstacle1_distance,
 
             "obstacle2_distance": obstacle2_distance,
 
-            "perturbation": perturbation,
+            # -----------------------------
+            # Experiment Outcome
+            # -----------------------------
 
             "reward": reward,
 
+            "collision": collision,
+
             "success": success,
 
-            "collision": collision
+            "route": route
 
         })
 
     def dataframe(self):
-        """
-        Return the logged data as a pandas DataFrame.
-        """
+
         return pd.DataFrame(self.records)
 
     def save(self, filename):
-        """
-        Save the logged data.
-        """
 
-        output_dir = Path("data/raw")
+        output = Path("data/raw")
 
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output.mkdir(parents=True, exist_ok=True)
 
-        filepath = output_dir / filename
+        filepath = output / filename
 
         self.dataframe().to_csv(filepath, index=False)
 

@@ -1,6 +1,6 @@
 """
 ==========================================================
-Logger Test
+Experiment Logger Test
 
 Authors:
 Peter Ohue
@@ -24,9 +24,9 @@ def main():
 
     logger = ExperimentLogger()
 
-    action = (0.0, 1.0)
-
     dt = 0.1
+
+    action = (0.0, 1.0)
 
     for step in range(20):
 
@@ -55,9 +55,15 @@ def main():
 
             episode=1,
 
+            trial=1,
+
             step=step,
 
             time=step * dt,
+
+            seed=42,
+
+            condition="P0",
 
             agent=world.agent,
 
@@ -65,13 +71,25 @@ def main():
 
             obstacle1_distance=obstacle1_distance,
 
-            obstacle2_distance=obstacle2_distance
+            obstacle2_distance=obstacle2_distance,
+
+            reward=0.0,
+
+            success=False,
+
+            collision=False,
+
+            route="Centre"
 
         )
 
+    df = logger.dataframe()
+
+    print(df.head())
+
     print()
 
-    print(logger.dataframe().head())
+    print(df.columns)
 
     logger.save("experiment_001.csv")
 
