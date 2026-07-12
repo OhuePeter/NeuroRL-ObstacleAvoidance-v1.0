@@ -49,13 +49,15 @@ class PhysicsEngine:
         agent: Agent,
         action: Tuple[float, float],
         dt: float,
+        external_force: Tuple[float, float] = (0.0, 0.0)
     ):
         """
-        Update the agent using acceleration commands.
+        Update the agent using acceleration commands and
+        optional external perturbation forces.
         """
 
-        ax = float(action[0])
-        ay = float(action[1])
+        ax = float(action[0]) + float(external_force[0])
+        ay = float(action[1]) + float(external_force[1])
 
         agent.move(ax, ay, dt)
 

@@ -8,8 +8,7 @@ Gunnar Blohm
 
 Description
 -----------
-Implements external perturbations applied during
-movement.
+Implements external perturbations applied during movement.
 
 Conditions
 ----------
@@ -33,32 +32,23 @@ class Perturbation:
 
         self.condition = condition
 
-        # Apply shortly after movement onset
         self.start_step = 40
-
-        # Apply for 10 simulation steps
         self.duration = 10
 
         self.forces = {
-
             "P0": (0.0, 0.0),
-
             "L1": (-0.20, 0.0),
             "L2": (-0.40, 0.0),
             "L3": (-0.80, 0.0),
-
             "R1": (0.20, 0.0),
             "R2": (0.40, 0.0),
             "R3": (0.80, 0.0),
         }
 
     def get_force(self, current_step):
+        """Return the perturbation force for the current step."""
 
-        if (
-            self.start_step
-            <= current_step
-            < self.start_step + self.duration
-        ):
+        if self.start_step <= current_step < self.start_step + self.duration:
             return self.forces[self.condition]
 
         return (0.0, 0.0)

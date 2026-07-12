@@ -1,33 +1,29 @@
 """
 ==========================================================
-Evaluation Script
+Evaluate Trained PPO Policy
 
 Authors:
 Peter Ohue
 Gunnar Blohm
-
-Version:
-1.1
 ==========================================================
 """
-
-import os
-
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from src.evaluation.evaluator import PolicyEvaluator
 
 
 def main():
 
-    model_path = (
-        "experiments/version_1_0/checkpoints/ppo_baseline_P0.zip"
+    MODEL = "experiments/version_1_0/checkpoints/ppo_baseline_P0"
+
+    CONDITION = "R3"
+
+    evaluator = PolicyEvaluator(
+        model_path=MODEL
     )
 
-    evaluator = PolicyEvaluator(model_path)
-
     evaluator.evaluate(
-        episodes=20
+        episodes=20,
+        condition=CONDITION
     )
 
 

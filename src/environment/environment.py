@@ -25,15 +25,20 @@ from src.environment.physics import PhysicsEngine
 from src.environment.reward import RewardFunction
 from src.environment.observation import ObservationBuilder
 from src.utils.logger import ExperimentLogger
+from src.perturbations.perturbation import Perturbation
 
 
 class NeuroRLEnvironment(gym.Env):
 
     metadata = {"render_modes": ["human"]}
 
-    def __init__(self):
+    def __init__(self, condition="P0"):
 
         super().__init__()
+
+        self.condition = condition
+
+
 
         self.world = World()
 
@@ -47,6 +52,8 @@ class NeuroRLEnvironment(gym.Env):
         self.observation_builder = ObservationBuilder()
 
         self.logger = ExperimentLogger()
+
+        self.perturbation = Perturbation(condition)
 
         self.dt = 0.05
 
@@ -76,7 +83,7 @@ class NeuroRLEnvironment(gym.Env):
 
         self.world.reset()
 
-        self.current_step = 0
+        self.current_step = 0        
 
         self.previous_goal_distance = self.physics.distance(
             self.world.agent.position,
@@ -99,10 +106,15 @@ class NeuroRLEnvironment(gym.Env):
         self.current_step += 1
 
         # Action now represents acceleration
+        force = self.perturbation.get_force(
+            self.current_step
+        )
+
         self.physics.update(
             self.world.agent,
             action,
-            self.dt
+            self.dt,
+            external_force=force
         )
 
         current_goal_distance = self.physics.distance(

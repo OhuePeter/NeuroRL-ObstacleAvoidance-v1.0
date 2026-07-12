@@ -12,7 +12,7 @@ Evaluates a trained PPO policy and saves
 episode trajectories and behavioural metrics.
 
 Version:
-1.3
+1.4
 ==========================================================
 """
 
@@ -20,7 +20,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 from stable_baselines3 import PPO
 
 from src.environment.environment import NeuroRLEnvironment
@@ -36,12 +35,14 @@ class PolicyEvaluator:
 
         self.model = PPO.load(model_path)
 
-        self.env = NeuroRLEnvironment()
-
-    def evaluate(self, episodes=20):
+    def evaluate(
+        self,
+        episodes=20,
+        condition="P0"
+    ):
 
         output_dir = Path(
-            "experiments/version_1_0/results/evaluation_P0"
+            f"experiments/version_1_0/results/evaluation_{condition}"
         )
 
         output_dir.mkdir(
@@ -49,9 +50,18 @@ class PolicyEvaluator:
             exist_ok=True
         )
 
+        # --------------------------------------------------
+        # Create environment for the selected condition
+        # --------------------------------------------------
+
+        self.env = NeuroRLEnvironment(
+            condition=condition
+        )
+
         summary = []
 
         successes = 0
+
         collisions = 0
 
         for episode in range(episodes):
@@ -59,9 +69,11 @@ class PolicyEvaluator:
             observation, _ = self.env.reset()
 
             terminated = False
+
             truncated = False
 
             trajectory = []
+
             kinematics = []
 
             total_reward = 0.0
@@ -73,7 +85,9 @@ class PolicyEvaluator:
                     deterministic=True
                 )
 
-                observation, reward, terminated, truncated, info = self.env.step(action)
+                observation, reward, terminated, truncated, info = (
+                    self.env.step(action)
+                )
 
                 total_reward += reward
 
@@ -136,6 +150,7 @@ class PolicyEvaluator:
             )
 
             success = info["goal_reached"]
+
             collision = info["collision"]
 
             if success:
@@ -186,7 +201,8 @@ class PolicyEvaluator:
 
             print(
                 f"Goal Position  : "
-                f"({self.env.world.goal.x:.3f}, {self.env.world.goal.y:.3f})"
+                f"({self.env.world.goal.x:.3f}, "
+                f"{self.env.world.goal.y:.3f})"
             )
 
             print(
@@ -239,6 +255,7 @@ class PolicyEvaluator:
 
         print("\nOverall Statistics")
         print("------------------------------")
+
         print(f"Episodes        : {episodes}")
         print(f"Successes       : {successes}")
         print(f"Success Rate    : {100 * successes / episodes:.1f}%")
