@@ -1,0 +1,59 @@
+# ==========================================================
+# PPO Training Configuration
+# ==========================================================
+
+training:
+
+  algorithm: PPO
+
+  total_timesteps: 3000000
+
+  learning_rate: 0.0003
+
+  gamma: 0.99
+
+  gae_lambda: 0.95
+
+  clip_range: 0.20
+
+  ent_coef: 0.01
+
+  vf_coef: 0.50
+
+  max_grad_norm: 0.50
+
+  batch_size: 512
+
+  n_steps: 1024
+
+  n_epochs: 10
+
+  seed: 42
+
+environment:
+
+  n_envs: 8
+
+  max_episode_steps: 200
+
+  dt: 0.05
+
+logging:
+
+  checkpoint_frequency: 50000
+
+  evaluation_frequency: 50000
+
+  tensorboard: true
+
+  save_best_model: true
+
+network:
+
+  hidden_layers:
+
+    - 256
+
+    - 256
+
+  activation: ReLU
