@@ -5,6 +5,14 @@ Policy Evaluator
 Authors:
 Peter Ohue
 Gunnar Blohm
+
+Description
+-----------
+Evaluates a trained PPO policy in the nominal (P0)
+environment and saves behavioural data.
+
+Version:
+1.1
 ==========================================================
 """
 
@@ -20,6 +28,9 @@ from src.evaluation.metrics import BehaviourMetrics
 
 
 class PolicyEvaluator:
+    """
+    Evaluate a trained policy.
+    """
 
     def __init__(self, model_path):
 
@@ -29,11 +40,11 @@ class PolicyEvaluator:
 
     def evaluate(self, episodes=20):
 
-        output = Path(
+        output_dir = Path(
             "experiments/version_1_0/results/evaluation_P0"
         )
 
-        output.mkdir(
+        output_dir.mkdir(
             parents=True,
             exist_ok=True
         )
@@ -44,69 +55,104 @@ class PolicyEvaluator:
 
             observation, _ = self.env.reset()
 
-            done = False
+            terminated = False
+            truncated = False
 
             trajectory = []
-
-            speeds = []
+            kinematics = []
 
             total_reward = 0.0
 
-            collision = False
-
-            success = False
-
-            while not done:
+            while not (terminated or truncated):
 
                 action, _ = self.model.predict(
-
                     observation,
-
                     deterministic=True
-
                 )
 
                 observation, reward, terminated, truncated, info = self.env.step(action)
 
                 total_reward += reward
 
+                agent = self.env.world.agent
+
                 trajectory.append([
-
-                    self.env.world.agent.x,
-
-                    self.env.world.agent.y
-
+                    agent.x,
+                    agent.y
                 ])
 
-                speeds.append(
+                kinematics.append([
+                    info["step"],
+                    agent.vx,
+                    agent.vy,
+                    agent.ax,
+                    agent.ay,
+                    agent.heading,
+                    info["goal_distance"],
+                    reward
+                ])
 
-                    self.env.physics.speed(
+            trajectory = np.asarray(trajectory)
 
-                        self.env.world.agent
-
-                    )
-
-                )
-
-                collision = info["collision"]
-
-                success = info["goal"]
-
-                done = terminated or truncated
-
-            trajectory = np.array(trajectory)
-
-            pd.DataFrame(
+            trajectory_df = pd.DataFrame(
 
                 trajectory,
 
-                columns=["x", "y"]
+                columns=[
+                    "x",
+                    "y"
+                ]
 
-            ).to_csv(
+            )
 
-                output / f"trajectory_{episode:03d}.csv",
+            trajectory_df.to_csv(
+
+                output_dir /
+                f"trajectory_{episode:03d}.csv",
 
                 index=False
+
+            )
+
+            kinematics_df = pd.DataFrame(
+
+                kinematics,
+
+                columns=[
+
+                    "step",
+
+                    "vx",
+
+                    "vy",
+
+                    "ax",
+
+                    "ay",
+
+                    "heading",
+
+                    "goal_distance",
+
+                    "reward"
+
+                ]
+
+            )
+
+            kinematics_df.to_csv(
+
+                output_dir /
+                f"kinematics_{episode:03d}.csv",
+
+                index=False
+
+            )
+
+            speeds = np.sqrt(
+
+                kinematics_df["vx"]**2 +
+                kinematics_df["vy"]**2
 
             )
 
@@ -116,35 +162,37 @@ class PolicyEvaluator:
 
                 "reward": total_reward,
 
-                "success":
+                "success": info["goal_reached"],
 
-                    BehaviourMetrics.success(success),
+                "collision": info["collision"],
 
-                "collision":
-
-                    BehaviourMetrics.collision(collision),
+                "steps": len(trajectory),
 
                 "path_length":
 
-                    BehaviourMetrics.path_length(trajectory),
+                    BehaviourMetrics.path_length(
+                        trajectory
+                    ),
 
                 "mean_speed":
 
-                    BehaviourMetrics.mean_speed(speeds),
+                    BehaviourMetrics.mean_speed(
+                        speeds
+                    ),
 
                 "max_speed":
 
-                    BehaviourMetrics.max_speed(speeds),
-
-                "steps":
-
-                    len(trajectory)
+                    BehaviourMetrics.max_speed(
+                        speeds
+                    )
 
             })
 
-        pd.DataFrame(summary).to_csv(
+        summary_df = pd.DataFrame(summary)
 
-            output / "summary.csv",
+        summary_df.to_csv(
+
+            output_dir / "summary.csv",
 
             index=False
 
@@ -153,9 +201,13 @@ class PolicyEvaluator:
         print()
 
         print("=" * 60)
-
-        print("Evaluation Complete")
-
+        print("EVALUATION COMPLETE")
         print("=" * 60)
 
-        print(output)
+        print()
+
+        print(summary_df)
+
+        print()
+
+        print(f"Results saved to:\n{output_dir}")
