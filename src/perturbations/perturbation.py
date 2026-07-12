@@ -28,11 +28,17 @@ Version:
 
 class Perturbation:
 
-    def __init__(self, condition="P0"):
+    def __init__(self, condition="P0", variability=None):
 
         self.condition = condition
 
-        self.start_step = 40
+        self.variability = variability
+
+        if variability is None:
+            self.start_step = 40
+        else:
+            self.start_step = variability.perturbation_step()
+            
         self.duration = 10
 
         self.forces = {

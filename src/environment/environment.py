@@ -26,19 +26,25 @@ from src.environment.reward import RewardFunction
 from src.environment.observation import ObservationBuilder
 from src.utils.logger import ExperimentLogger
 from src.perturbations.perturbation import Perturbation
+from src.evaluation.biological_variability import BiologicalVariability
 
 
 class NeuroRLEnvironment(gym.Env):
 
     metadata = {"render_modes": ["human"]}
 
-    def __init__(self, condition="P0"):
+    def __init__(self, condition="P0", biological_variability=False):
 
         super().__init__()
 
         self.condition = condition
 
 
+        self.biological_variability = biological_variability
+        if self.biological_variability:
+            self.variability = BiologicalVariability()
+        else:
+            self.variability = None
 
         self.world = World()
 
@@ -53,7 +59,10 @@ class NeuroRLEnvironment(gym.Env):
 
         self.logger = ExperimentLogger()
 
-        self.perturbation = Perturbation(condition)
+        self.perturbation = Perturbation(
+            condition=condition,
+            variability=self.variability
+        )
 
         self.dt = 0.05
 
@@ -82,6 +91,17 @@ class NeuroRLEnvironment(gym.Env):
         super().reset(seed=seed)
 
         self.world.reset()
+        
+        if self.biological_variability:
+            x, y = self.variability.random_start(
+                self.world.agent.x,
+                self.world.agent.y
+            )
+            self.world.agent.x = x
+            self.world.agent.y = y
+
+            self.world.agent.start_x = x
+            self.world.agent.start_y = y
 
         self.current_step = 0        
 
@@ -91,6 +111,11 @@ class NeuroRLEnvironment(gym.Env):
         )
 
         observation = self.observation_builder.build(self.world)
+
+        if self.biological_variability:
+            observation = self.variability.observation_noise(
+                observation
+            )
 
         info = {
             "goal_distance": self.previous_goal_distance,
@@ -173,7 +198,7 @@ class NeuroRLEnvironment(gym.Env):
 
             seed=42,
 
-            condition="P0",
+            condition=self.condition,
 
             agent=self.world.agent,
 
@@ -196,6 +221,11 @@ class NeuroRLEnvironment(gym.Env):
         self.previous_goal_distance = current_goal_distance
 
         observation = self.observation_builder.build(self.world)
+
+        if self.biological_variability:
+            observation = self.variability.observation_noise(
+                observation
+            )
 
         terminated = goal_reached or collision
 
