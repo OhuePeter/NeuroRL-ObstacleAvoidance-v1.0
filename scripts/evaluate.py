@@ -21,7 +21,7 @@ from src.evaluation.evaluator import PolicyEvaluator
 def main():
 
     model_path = (
-        "experiments/version_1_0/checkpoints/ppo_final.zip"
+        "experiments/version_1_0/checkpoints/ppo_baseline_P0.zip"
     )
 
     evaluator = PolicyEvaluator(model_path)
