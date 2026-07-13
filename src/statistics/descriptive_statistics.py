@@ -12,7 +12,7 @@ Computes descriptive statistics across all
 evaluation conditions.
 
 Version:
-2.0
+2.1
 ==========================================================
 """
 
@@ -28,20 +28,17 @@ class DescriptiveStatistics:
 
         self.root = Path(results_root)
 
-    def analyse_condition(self, condition):
+        self.conditions = [
+            "P0",
+            "L1",
+            "L2",
+            "L3",
+            "R1",
+            "R2",
+            "R3",
+        ]
 
-        summary = pd.read_csv(
-            self.root /
-            f"evaluation_{condition}" /
-            "summary.csv"
-        )
-
-        results = {}
-
-        # --------------------------------------------
-        # Metrics to analyse
-        # --------------------------------------------
-        metrics = [
+        self.metrics = [
             "reward",
             "steps",
             "path_length",
@@ -52,32 +49,36 @@ class DescriptiveStatistics:
             "final_lateral_error",
         ]
 
-        for column in metrics:
+    def analyse_condition(self, condition):
 
-            values = summary[column].values
+        summary = pd.read_csv(
+            self.root /
+            f"evaluation_{condition}" /
+            "summary.csv"
+        )
 
-            results[f"{column}_mean"] = np.mean(values)
+        results = {
+            "condition": condition
+        }
 
-            results[f"{column}_sd"] = np.std(
-                values,
-                ddof=1
-            )
+        for metric in self.metrics:
 
-            results[f"{column}_sem"] = (
-                results[f"{column}_sd"] /
+            values = summary[metric].values
+
+            results[f"{metric}_mean"] = np.mean(values)
+            results[f"{metric}_sd"] = np.std(values, ddof=1)
+            results[f"{metric}_sem"] = (
+                results[f"{metric}_sd"] /
                 np.sqrt(len(values))
             )
 
-            ci95 = (
+            results[f"{metric}_ci95"] = (
                 1.96 *
-                results[f"{column}_sem"]
+                results[f"{metric}_sem"]
             )
 
-            results[f"{column}_ci95"] = ci95
-
-            results[f"{column}_min"] = np.min(values)
-
-            results[f"{column}_max"] = np.max(values)
+            results[f"{metric}_min"] = np.min(values)
+            results[f"{metric}_max"] = np.max(values)
 
         results["success_rate"] = (
             100 *
@@ -93,26 +94,15 @@ class DescriptiveStatistics:
 
     def analyse_all(self):
 
-        conditions = "P0"
-
         rows = []
 
-        for condition in conditions:
+        for condition in self.conditions:
 
-            stats = self.analyse_condition(
-                condition
+            rows.append(
+                self.analyse_condition(condition)
             )
 
-            stats["condition"] = condition
-
-            rows.append(stats)
-
         df = pd.DataFrame(rows)
-
-        df = df[
-            ["condition"] +
-            [c for c in df.columns if c != "condition"]
-        ]
 
         output = (
             self.root /
@@ -129,8 +119,6 @@ class DescriptiveStatistics:
         print("=" * 70)
         print(df)
 
-        print(
-            f"\nSaved to:\n{output}"
-        )
+        print(f"\nSaved to:\n{output}")
 
         return df

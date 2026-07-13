@@ -1,14 +1,13 @@
+"""
+Run inferential statistics.
+"""
+
 from src.statistics.inferential_statistics import InferentialStatistics
 
 stats = InferentialStatistics(
     "experiments/version_1_0/results"
 )
 
-for metric in [
-    "reward",
-    "steps",
-    "path_length",
-    "mean_speed",
-    "max_speed"
-]:
-    stats.analyse_metric(metric)
+stats.analyse_all()
+
+print("\nInferential statistics complete.")
