@@ -161,17 +161,13 @@ class PolicyEvaluator:
                 collisions += 1
 
             summary.append({
-
                 "episode": episode,
-
                 "reward": total_reward,
-
                 "success": success,
-
                 "collision": collision,
-
                 "steps": len(trajectory),
 
+                # Existing metrics
                 "path_length": BehaviourMetrics.path_length(
                     trajectory
                 ),
@@ -182,8 +178,29 @@ class PolicyEvaluator:
 
                 "max_speed": BehaviourMetrics.max_speed(
                     kinematics_df["speed"]
-                )
+                ),
 
+                # --------------------------------------------------
+                # New behavioural metrics
+                # --------------------------------------------------
+
+                # Largest sideways velocity
+                "peak_lateral_velocity": np.abs(
+                    kinematics_df["vx"]
+                ).max(),
+
+                # Maximum deviation from straight upward movement
+                "max_heading_deviation": np.max(
+                    np.abs(
+                        kinematics_df["heading"] - np.pi / 2
+                    )
+                ),
+
+                # Final x-error relative to goal
+                "final_lateral_error": abs(
+                    agent.x -
+                    self.env.world.goal.x
+                ),
             })
 
             print("\n" + "=" * 60)
