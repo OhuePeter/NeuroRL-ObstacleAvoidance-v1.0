@@ -130,6 +130,9 @@ class NeuroRLEnvironment(gym.Env):
 
         self.current_step += 1
 
+        if self.biological_variability:
+            action = self.variability.action_noise(action)
+
         # Action now represents acceleration
         force = self.perturbation.get_force(
             self.current_step

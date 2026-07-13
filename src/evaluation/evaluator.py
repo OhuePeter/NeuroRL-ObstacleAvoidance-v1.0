@@ -55,7 +55,8 @@ class PolicyEvaluator:
         # --------------------------------------------------
 
         self.env = NeuroRLEnvironment(
-            condition=condition
+            condition=condition,
+            biological_variability=True
         )
 
         summary = []
