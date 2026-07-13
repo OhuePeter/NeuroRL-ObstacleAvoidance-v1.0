@@ -12,7 +12,7 @@ Computes descriptive statistics across all
 evaluation conditions.
 
 Version:
-1.0
+2.0
 ==========================================================
 """
 
@@ -38,20 +38,33 @@ class DescriptiveStatistics:
 
         results = {}
 
-        for column in [
+        # --------------------------------------------
+        # Metrics to analyse
+        # --------------------------------------------
+        metrics = [
             "reward",
             "steps",
             "path_length",
             "mean_speed",
-            "max_speed"
-        ]:
+            "max_speed",
+            "peak_lateral_velocity",
+            "max_heading_deviation",
+            "final_lateral_error",
+        ]
+
+        for column in metrics:
 
             values = summary[column].values
 
             results[f"{column}_mean"] = np.mean(values)
-            results[f"{column}_sd"] = np.std(values, ddof=1)
+
+            results[f"{column}_sd"] = np.std(
+                values,
+                ddof=1
+            )
+
             results[f"{column}_sem"] = (
-                np.std(values, ddof=1) /
+                results[f"{column}_sd"] /
                 np.sqrt(len(values))
             )
 
@@ -61,6 +74,10 @@ class DescriptiveStatistics:
             )
 
             results[f"{column}_ci95"] = ci95
+
+            results[f"{column}_min"] = np.min(values)
+
+            results[f"{column}_max"] = np.max(values)
 
         results["success_rate"] = (
             100 *
@@ -90,7 +107,9 @@ class DescriptiveStatistics:
 
         for condition in conditions:
 
-            stats = self.analyse_condition(condition)
+            stats = self.analyse_condition(
+                condition
+            )
 
             stats["condition"] = condition
 
@@ -98,14 +117,28 @@ class DescriptiveStatistics:
 
         df = pd.DataFrame(rows)
 
-        df.to_csv(
+        df = df[
+            ["condition"] +
+            [c for c in df.columns if c != "condition"]
+        ]
 
+        output = (
             self.root /
-            "descriptive_statistics.csv",
+            "descriptive_statistics.csv"
+        )
 
+        df.to_csv(
+            output,
             index=False
         )
 
+        print("\n" + "=" * 70)
+        print("DESCRIPTIVE STATISTICS")
+        print("=" * 70)
         print(df)
+
+        print(
+            f"\nSaved to:\n{output}"
+        )
 
         return df
