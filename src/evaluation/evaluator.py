@@ -38,7 +38,7 @@ class PolicyEvaluator:
     def evaluate(
         self,
         episodes=20,
-        condition="P0"
+        condition="R3"
     ):
 
         output_dir = Path(

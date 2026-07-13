@@ -93,15 +93,7 @@ class DescriptiveStatistics:
 
     def analyse_all(self):
 
-        conditions = [
-            "P0",
-            "L1",
-            "L2",
-            "L3",
-            "R1",
-            "R2",
-            "R3"
-        ]
+        conditions = "P0"
 
         rows = []
 
