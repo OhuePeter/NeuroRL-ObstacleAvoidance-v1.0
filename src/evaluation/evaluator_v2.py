@@ -40,6 +40,7 @@ from stable_baselines3 import PPO
 from src.environment.environment_v2 import NeuroRLEnvironmentV2
 from src.evaluation.metrics import BehaviourMetrics
 
+import torch
 
 class PolicyEvaluatorV2:
     """
@@ -65,6 +66,88 @@ class PolicyEvaluatorV2:
 
         self.model = PPO.load(str(self.model_path))
 
+    def _save_episode_metadata(
+        self,
+        output_dir,
+        episode,
+        condition,
+        success,
+        collision,
+        total_reward,
+        steps,
+        goal_distance,
+        path_length,
+        mean_speed,
+        max_speed,
+        heading_deviation,
+        final_lateral_error,
+    ):
+        """
+        Save metadata describing one evaluation episode.
+
+        Parameters
+        ----------
+        output_dir : Path
+            Directory where evaluation results are stored.
+        """
+
+        import json
+        from pathlib import Path
+
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        metadata = {
+
+            # --------------------------------------------------
+            # Episode information
+            # --------------------------------------------------
+            "episode": int(episode),
+            "condition": str(condition),
+
+            # --------------------------------------------------
+            # Outcome
+            # --------------------------------------------------
+            "success": bool(success),
+            "failure": not bool(success),
+            "collision": bool(collision),
+
+            # Failure type
+            "failure_type": (
+                "collision"
+                if collision
+                else (
+                    "timeout"
+                    if not success
+                    else "none"
+                )
+            ),
+
+            # --------------------------------------------------
+            # Performance
+            # --------------------------------------------------
+            "reward": float(total_reward),
+            "steps": int(steps),
+
+            # --------------------------------------------------
+            # Behavioural metrics
+            # --------------------------------------------------
+            "goal_distance": float(goal_distance),
+            "path_length": float(path_length),
+            "mean_speed": float(mean_speed),
+            "maximum_speed": float(max_speed),
+            "heading_deviation": float(heading_deviation),
+            "final_lateral_error": float(final_lateral_error),
+        }
+
+        filename = output_dir / f"metadata_{episode:03d}.json"
+
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(
+                metadata,
+                f,
+                indent=4,
+            )
     def evaluate(
         self,
         episodes=N_EPISODES,
@@ -146,11 +229,21 @@ class PolicyEvaluatorV2:
         print(f"Evaluating {condition}")
         print("=" * 60)
 
+        # ----------------------------------------------------------
+        # Neural recordings
+        # ----------------------------------------------------------
+
         # ======================================================
         # Evaluate all episodes
         # ======================================================
 
         for episode in range(episodes):
+
+            policy_activations = []
+            value_activations = []
+            observations = []
+            actions = []
+            rewards = []
 
             observation, _ = self.env.reset()
 
@@ -164,14 +257,45 @@ class PolicyEvaluatorV2:
 
             while not (terminated or truncated):
 
+                # ----------------------------------------------------------
+                # Record observation
+                # ----------------------------------------------------------
+
+                obs_tensor = torch.as_tensor(
+                    observation,
+                    dtype=torch.float32,
+                ).unsqueeze(0)
+
+                with torch.no_grad():
+
+                    features = self.model.policy.extract_features(obs_tensor)
+
+                    latent_pi, latent_vf = (
+                        self.model.policy.mlp_extractor(features)
+                    )
+
+                policy_activations.append(
+                    latent_pi.cpu().numpy().squeeze()
+                )
+
+                value_activations.append(
+                    latent_vf.cpu().numpy().squeeze()
+                )
+
+                observations.append(
+                    observation.copy()
+                )
+                
                 action, _ = self.model.predict(
                     observation,
                     deterministic=True,
                 )
+                actions.append(action.copy())
 
                 observation, reward, terminated, truncated, info = (
                     self.env.step(action)
                 )
+                rewards.append(reward)
 
                 total_reward += reward
 
@@ -233,6 +357,40 @@ class PolicyEvaluatorV2:
             kinematics_df.to_csv(
                 output_dir / f"kinematics_{episode:03d}.csv",
                 index=False,
+            )
+            # ----------------------------------------------------------
+            # Save neural recordings
+            # ----------------------------------------------------------
+
+            neural_dir = output_dir / "neural"
+            neural_dir.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            np.save(
+                neural_dir / f"policy_{episode:03d}.npy",
+                np.asarray(policy_activations),
+            )
+
+            np.save(
+                neural_dir / f"value_{episode:03d}.npy",
+                np.asarray(value_activations),
+            )
+
+            np.save(
+                neural_dir / f"observations_{episode:03d}.npy",
+                np.asarray(observations),
+            )
+
+            np.save(
+                neural_dir / f"actions_{episode:03d}.npy",
+                np.asarray(actions),
+            )
+
+            np.save(
+                neural_dir / f"rewards_{episode:03d}.npy",
+                np.asarray(rewards),
             )
 
             success = info["goal_reached"]
@@ -360,6 +518,22 @@ class PolicyEvaluatorV2:
             print(
                 f"Final Lateral Error : "
                 f"{summary[-1]['final_lateral_error']:.3f}"
+            )
+
+            self._save_episode_metadata(
+                output_dir=output_dir,
+                episode=episode,
+                condition=condition,
+                success=success,
+                collision=collision,
+                total_reward=total_reward,
+                steps=len(trajectory),
+                goal_distance=info["goal_distance"],
+                path_length=summary[-1]["path_length"],
+                mean_speed=summary[-1]["mean_speed"],
+                max_speed=summary[-1]["max_speed"],
+                heading_deviation=summary[-1]["max_heading_deviation"],
+                final_lateral_error=summary[-1]["final_lateral_error"],
             )
 
         # ======================================================
@@ -546,126 +720,5 @@ class PolicyEvaluatorV2:
             "output_directory": output_dir,
         }
 
-        # ----------------------------------------------------------
-        # Save overall summary
-        # ----------------------------------------------------------
-
-        summary_df = pd.DataFrame(summary)
-
-        summary_df.to_csv(
-            self.output_dir / "summary.csv",
-            index=False,
-        )
 
         # ----------------------------------------------------------
-        # Robustness statistics
-        # ----------------------------------------------------------
-
-        robustness = {
-            "condition": condition,
-            "episodes": episodes,
-            "successes": successes,
-            "failures": episodes - successes,
-            "collisions": collisions,
-            "success_rate": successes / episodes,
-            "collision_rate": collisions / episodes,
-            "mean_reward": summary_df["reward"].mean(),
-            "std_reward": summary_df["reward"].std(),
-            "mean_steps": summary_df["steps"].mean(),
-            "std_steps": summary_df["steps"].std(),
-            "mean_path_length": summary_df["path_length"].mean(),
-            "mean_speed": summary_df["mean_speed"].mean(),
-            "mean_final_error": summary_df["final_lateral_error"].mean(),
-        }
-
-        robustness_df = pd.DataFrame([robustness])
-
-        robustness_dir = (
-            Path("experiments")
-            / "version_2_0"
-            / "results"
-            / "robustness"
-        )
-
-        robustness_dir.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        robustness_df.to_csv(
-            robustness_dir / f"{condition}_summary.csv",
-            index=False,
-        )
-
-        # ----------------------------------------------------------
-        # Console summary
-        # ----------------------------------------------------------
-
-        print("\n" + "=" * 70)
-        print(f"Experiment 2 Summary ({condition})")
-        print("=" * 70)
-
-        print(f"Episodes           : {episodes}")
-        print(f"Successes          : {successes}")
-        print(f"Failures           : {episodes - successes}")
-        print(f"Collisions         : {collisions}")
-
-        print(
-            f"Success Rate       : "
-            f"{100 * successes / episodes:.1f}%"
-        )
-
-        print(
-            f"Collision Rate     : "
-            f"{100 * collisions / episodes:.1f}%"
-        )
-
-        print(
-            f"Average Reward     : "
-            f"{summary_df['reward'].mean():.2f}"
-        )
-
-        print(
-            f"Average Steps      : "
-            f"{summary_df['steps'].mean():.1f}"
-        )
-
-        print(
-            f"Average Path Length: "
-            f"{summary_df['path_length'].mean():.3f}"
-        )
-
-        print(
-            f"Average Speed      : "
-            f"{summary_df['mean_speed'].mean():.3f}"
-        )
-
-        print(
-            f"Average Final Error: "
-            f"{summary_df['final_lateral_error'].mean():.3f}"
-        )
-
-        print("\nResults written to")
-
-        print(self.output_dir)
-
-        print("\nRobustness summary")
-
-        print(
-            robustness_dir /
-            f"{condition}_summary.csv"
-        )
-
-        print("=" * 70)
-
-        return {
-            "condition": condition,
-            "episodes": episodes,
-            "successes": successes,
-            "failures": episodes - successes,
-            "collisions": collisions,
-            "summary": summary_df,
-            "output_directory": self.output_dir,
-        }
-
-        

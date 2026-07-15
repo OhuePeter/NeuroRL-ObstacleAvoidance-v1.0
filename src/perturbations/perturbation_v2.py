@@ -52,7 +52,7 @@ class Perturbation:
             self.start_step = variability.perturbation_step()
 
         # Perturbation duration (simulation steps)
-        self.duration = 15
+        self.duration = 20
 
         # --------------------------------------------------
         # Stronger perturbation magnitudes
