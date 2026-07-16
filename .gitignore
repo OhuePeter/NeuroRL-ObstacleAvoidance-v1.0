@@ -36,3 +36,5 @@ checkpoints/
 *.pdf
 
 .DS_Store
+
+presentation/poster/output/
