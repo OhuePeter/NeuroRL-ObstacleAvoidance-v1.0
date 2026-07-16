@@ -9,12 +9,15 @@ Constraint:
 
 Current committed or generated main-text candidates:
 - Figure 1: task schematic
+- Figure 2: behavioural trajectories
+- Figure 3: behavioural performance
+- Figure 4: behavioural adaptation
 - Neural summary panel
 - Neural 3D PCA
 - Neural trajectories
 - Neural success vs failure
 
-This leaves 3 remaining main-text figure slots.
+This fills the full 8-figure main-text budget.
 
 ## Recommended main-text figure sequence
 
@@ -29,45 +32,34 @@ Status:
 - Ready
 
 ### Figure 2. Behavioural trajectory overview across perturbation conditions
-Suggested content:
-- Mean trajectory per condition
-- Overlay trajectories or representative trials
-- Clear separation of left and right perturbations
-Candidate scripts:
-- scripts/analysis/plot_mean_trajectories.py
-- scripts/analysis/plot_overlay_trajectories.py
-- scripts/plot_overlay_trajectories.py
+Source:
+- paper/figures/figure2_behavioural_trajectories.pdf
+Script:
+- scripts/analysis/manuscript_behavioral_figures.py
 Purpose:
 - Show how perturbations deform reach geometry at the behavioural level.
 Status:
-- To assemble as manuscript panel
+- Ready
 
 ### Figure 3. Behavioural performance summary
-Suggested content:
-- Compact multi-panel boxplot or violin figure
-- Reward
-- Duration
-- Path length
-- Final lateral error
-Candidate script:
-- scripts/analysis/publication_figures.py
+Source:
+- paper/figures/figure3_behavioural_performance.pdf
+Script:
+- scripts/analysis/manuscript_behavioral_figures.py
 Purpose:
 - Present the main behavioural outcome measures in one paper-ready figure.
 Status:
-- Needs panel selection and manuscript export
+- Ready
 
 ### Figure 4. Behavioural strategy or failure analysis
-Suggested content:
-- Failure trajectories, route selection, or cumulative perturbation effects
-- Prefer one message only: robustness breakdown or route adaptation
-Candidate scripts:
-- scripts/plot_failure_trajectories.py
-- scripts/analysis/plot_route_selection.py
-- scripts/plot_cumulative_trajectories.py
+Source:
+- paper/figures/figure4_behavioural_adaptation.pdf
+Script:
+- scripts/analysis/manuscript_behavioral_figures.py
 Purpose:
-- Show the behavioural mechanism behind condition-dependent success and failure.
+- Show robustness breakdown and adaptation across perturbation conditions.
 Status:
-- Choose one strongest story, move the others to supplement
+- Ready
 
 ### Figure 5. Neural population summary
 Source:
@@ -137,7 +129,6 @@ Current generated tables:
 
 ## Recommended next production steps
 
-1. Convert behavioural figures into manuscript-ready panels for Figure 2 and Figure 3.
-2. Decide whether Figure 4 should emphasize failure patterns or route-selection strategy.
-3. Keep Figures 5 to 8 as the finalized neural result block unless the manuscript narrative changes.
-4. Move excess diagnostics to supplementary material early to avoid figure-count drift.
+1. Keep Figures 1 to 8 fixed unless the manuscript narrative changes substantially.
+2. Move excess diagnostics and alternate behavioural visualizations to supplementary material.
+3. Revise manuscript prose section by section against the current fixed figure and table set.
