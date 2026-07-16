@@ -31,3 +31,5 @@ statsmodels
 h5py
 
 jupyter
+
+qrcode
