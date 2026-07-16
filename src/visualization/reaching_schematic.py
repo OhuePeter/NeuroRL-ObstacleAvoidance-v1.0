@@ -24,6 +24,7 @@ from matplotlib.patches import (
     Circle,
     FancyArrowPatch,
     FancyBboxPatch,
+    Rectangle,
     PathPatch,
 )
 
@@ -37,14 +38,16 @@ class ReachingSchematic:
 
     def __init__(self):
 
-        self.output = Path(
-            "experiments/version_1_0/figures"
-        )
+        self.outputs = [
+            Path("paper/figures"),
+            Path("experiments/version_1_0/figures"),
+        ]
 
-        self.output.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
+        for output in self.outputs:
+            output.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
 
         # --------------------------------------------------
         # Colour palette
@@ -52,7 +55,12 @@ class ReachingSchematic:
 
         self.BLACK = "#222222"
         self.GRAY = "#D9D9D9"
+        self.LIGHT_GRAY = "#F2F2F2"
+        self.SLATE = "#4C566A"
         self.BLUE = "#2F6DB2"
+        self.TEAL = "#2A9D8F"
+        self.ORANGE = "#E07A2F"
+        self.RED = "#C8553D"
         self.WHITE = "#FFFFFF"
 
     # ------------------------------------------------------
@@ -95,37 +103,55 @@ class ReachingSchematic:
 
     def draw(self):
 
-        plt.rcParams["font.family"] = "DejaVu Sans"
+        plt.rcParams["font.family"] = "DejaVu Serif"
 
         fig, ax = plt.subplots(
-            figsize=(15, 8)
+            figsize=(14, 7)
         )
 
-        ax.set_xlim(0, 15)
-        ax.set_ylim(0, 8)
+        ax.set_xlim(0, 15.2)
+        ax.set_ylim(0, 8.2)
 
         ax.set_aspect("equal")
         ax.axis("off")
 
         # --------------------------------------------------
-        # Title
+        # Panel backgrounds
         # --------------------------------------------------
 
-        ax.text(
-            7.5,
-            7.55,
-            "Adaptive Goal-Directed Reaching Under External Perturbations",
-            ha="center",
-            fontsize=18,
-            fontweight="bold",
+        task_panel = FancyBboxPatch(
+            (0.45, 0.55),
+            5.5,
+            6.9,
+            boxstyle="round,pad=0.04,rounding_size=0.06",
+            linewidth=1.0,
+            edgecolor="#CFCFCF",
+            facecolor="#FBFBFB",
+            zorder=0,
         )
+        ax.add_patch(task_panel)
+
+        loop_panel = FancyBboxPatch(
+            (8.35, 1.35),
+            5.9,
+            4.9,
+            boxstyle="round,pad=0.04,rounding_size=0.06",
+            linewidth=1.0,
+            edgecolor="#CFCFCF",
+            facecolor="#FBFBFB",
+            zorder=0,
+        )
+        ax.add_patch(loop_panel)
+
+        ax.text(0.75, 7.0, "Task setup", fontsize=14, fontweight="bold", color=self.SLATE)
+        ax.text(8.65, 5.85, "Closed-loop control architecture", fontsize=14, fontweight="bold", color=self.SLATE)
 
         # ==================================================
         # Workspace
         # ==================================================
 
         # Workspace centre
-        cx = 4.0
+        cx = 3.2
 
         # Key positions
         start = (cx, 1.0)
@@ -138,6 +164,19 @@ class ReachingSchematic:
         # --------------------------------------------------
         # Start
         # --------------------------------------------------
+
+        workspace = Rectangle(
+            (1.2, 1.0),
+            4.0,
+            5.8,
+            linewidth=1.2,
+            edgecolor="#D7D7D7",
+            facecolor=self.WHITE,
+            zorder=0.5,
+        )
+        ax.add_patch(workspace)
+
+        ax.text(1.35, 6.45, "2D reaching workspace", fontsize=10, color=self.SLATE)
 
         ax.plot(
             start[0],
@@ -164,9 +203,9 @@ class ReachingSchematic:
             Circle(
                 goal,
                 radius=0.15,
-                facecolor="white",
-                edgecolor=self.BLUE,
-                linewidth=2,
+                facecolor=self.WHITE,
+                edgecolor=self.TEAL,
+                linewidth=2.2,
                 zorder=10,
             )
         )
@@ -187,7 +226,7 @@ class ReachingSchematic:
             Circle(
                 obstacle,
                 radius=0.45,
-                facecolor=self.GRAY,
+                facecolor="#D8DEE9",
                 edgecolor=self.BLACK,
                 linewidth=1.5,
                 zorder=5,
@@ -240,11 +279,11 @@ class ReachingSchematic:
 
                 facecolor="none",
 
-                edgecolor=self.BLACK,
+                edgecolor=self.BLUE,
 
                 linewidth=2.0,
 
-                linestyle="--",
+                linestyle="-",
 
                 zorder=1,
 
@@ -268,7 +307,7 @@ class ReachingSchematic:
 
                 lw=1.8,
 
-                color=self.BLACK,
+                color=self.BLUE,
 
             ),
 
@@ -286,7 +325,7 @@ class ReachingSchematic:
 
             "o",
 
-            color=self.BLACK,
+            color=self.BLUE,
 
             markersize=9,
 
@@ -365,11 +404,13 @@ class ReachingSchematic:
 
             perturb_y + 0.35,
 
-            "External perturbation",
+            "Lateral perturbation",
 
             ha="center",
 
             fontsize=10,
+
+            color=self.RED,
 
         )
 
@@ -391,7 +432,7 @@ class ReachingSchematic:
             controller_y,
             box_w,
             box_h,
-            "PPO\nController",
+            "PPO policy\ncontroller",
         )
 
         # Environment
@@ -401,7 +442,7 @@ class ReachingSchematic:
             environment_y,
             box_w,
             box_h,
-            "Point-Mass\nEnvironment",
+            "Point-mass\nenvironment",
         )
 
         # --------------------------------------------------
@@ -422,7 +463,7 @@ class ReachingSchematic:
         ax.text(
             box_x + box_w / 2 + 0.25,
             4.0,
-            "Action",
+            "Motor action",
             fontsize=10,
             va="center",
         )
@@ -438,7 +479,7 @@ class ReachingSchematic:
             arrowstyle="-|>",
             mutation_scale=15,
             linewidth=1.8,
-            color=self.BLACK,
+            color=self.TEAL,
         )
 
         ax.add_patch(observation)
@@ -446,7 +487,7 @@ class ReachingSchematic:
         ax.text(
             box_x - 1.35,
             4.0,
-            "Observation",
+            "State observation",
             fontsize=10,
             ha="center",
         )
@@ -462,7 +503,7 @@ class ReachingSchematic:
             arrowstyle="-|>",
             mutation_scale=15,
             linewidth=1.8,
-            color=self.BLACK,
+            color=self.ORANGE,
         )
 
         ax.add_patch(reward)
@@ -470,7 +511,7 @@ class ReachingSchematic:
         ax.text(
             box_x + box_w + 1.0,
             4.0,
-            "Reward",
+            "Reward signal",
             fontsize=10,
             ha="center",
         )
@@ -484,9 +525,9 @@ class ReachingSchematic:
             (box_x, 2.4),
             arrowstyle="-|>",
             mutation_scale=15,
-            linewidth=1.5,
+            linewidth=1.6,
             linestyle="--",
-            color="gray",
+            color="#8E8E8E",
         )
 
         ax.add_patch(workspace_connection)
@@ -494,22 +535,17 @@ class ReachingSchematic:
         ax.text(
             7.8,
             2.45,
-            "Interaction",
+            "Simulated reach",
             fontsize=9,
-            color="gray",
+            color="#7A7A7A",
         )
 
-        # ==================================================
-        # Figure Label (optional)
-        # ==================================================
-
         ax.text(
-            0.4,
-            0.35,
-            "Figure 1",
-            fontsize=11,
-            fontweight="bold",
-            color=self.BLACK,
+            8.65,
+            1.8,
+            "Observation and reward are fed back each timestep\nwhile the policy updates the reach trajectory online.",
+            fontsize=9.5,
+            color=self.SLATE,
         )
 
         # ==================================================
@@ -522,20 +558,22 @@ class ReachingSchematic:
         # Save figure
         # ==================================================
 
-        filename = "Figure1_Adaptive_Reaching_Framework"
+        filename = "figure1_schematic"
 
         for ext in ["png", "pdf", "svg"]:
 
-            outfile = self.output / f"{filename}.{ext}"
+            for output in self.outputs:
 
-            plt.savefig(
-                outfile,
-                dpi=600,
-                bbox_inches="tight",
-                facecolor="white",
-            )
+                outfile = output / f"{filename}.{ext}"
 
-            print(f"Saved: {outfile}")
+                plt.savefig(
+                    outfile,
+                    dpi=600,
+                    bbox_inches="tight",
+                    facecolor="white",
+                )
+
+                print(f"Saved: {outfile}")
 
         plt.close(fig)
 

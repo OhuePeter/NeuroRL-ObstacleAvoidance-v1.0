@@ -1,0 +1,19 @@
+\begin{table*}[t]
+\centering
+\caption{Assumption checks for parametric testing. Shapiro-Wilk p-values summarize the minimum normality evidence across perturbation groups for each measure, and Levene's test evaluates homogeneity of variance.}
+\label{tab:assumption_tests}
+\begin{tabular}{lcccc}
+\hline
+Variable & Shapiro p & Normal & Levene p & Equal Variance \\
+\hline
+Episode Reward & < 0.001 & No & < 0.001 & No \\
+Episode Duration & < 0.001 & No & < 0.001 & No \\
+Path Length & < 0.001 & No & < 0.001 & No \\
+Mean Speed & < 0.001 & No & < 0.001 & No \\
+Maximum Speed & 1.000 & Yes & -- & No \\
+Peak Lateral Velocity & 0.143 & Yes & < 0.001 & No \\
+Maximum Heading Deviation & 0.004 & No & < 0.001 & No \\
+Final Lateral Error & < 0.001 & No & < 0.001 & No \\
+\hline
+\end{tabular}
+\end{table*}

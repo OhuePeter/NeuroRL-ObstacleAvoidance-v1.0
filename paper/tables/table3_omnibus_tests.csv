@@ -1,0 +1,9 @@
+Variable,Test,Statistic,p-value,Effect Size (Eta²),Significant
+Episode Reward,Kruskal-Wallis,86.604,< 0.001,--,Yes
+Episode Duration,Kruskal-Wallis,127.471,< 0.001,--,Yes
+Path Length,Kruskal-Wallis,127.227,< 0.001,--,Yes
+Mean Speed,Kruskal-Wallis,126.816,< 0.001,--,Yes
+Maximum Speed,No-variance (all values identical),0.000,1.000,--,No
+Peak Lateral Velocity,Kruskal-Wallis,112.775,< 0.001,--,Yes
+Maximum Heading Deviation,Kruskal-Wallis,112.207,< 0.001,--,Yes
+Final Lateral Error,Kruskal-Wallis,61.316,< 0.001,--,Yes
