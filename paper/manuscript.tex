@@ -28,8 +28,8 @@ Control is implemented by a PPO policy operating in closed loop with the point-m
 \includegraphics[width=0.96\textwidth]{figures/figure1_schematic.pdf}
 \caption{
 Schematic of the adaptive goal-directed reaching task and control architecture.
-On the left, the agent starts from a fixed initial position and must reach a goal while avoiding an obstacle and compensating for transient lateral perturbations.
-On the right, a PPO controller interacts with the point-mass environment in closed loop through observation, action, and reward signals.
+The agent begins from a fixed start location and must reach the goal while avoiding a central obstacle and compensating for transient lateral perturbations.
+The PPO controller operates in closed loop with the point-mass environment through state observations, motor actions, and reward feedback.
 }
 \label{fig:schematic}
 \end{figure*}
@@ -52,8 +52,8 @@ Figure~\ref{fig:behavioural_adaptation} then summarizes robustness and compensat
 \includegraphics[width=0.98\textwidth]{figures/figure2_behavioural_trajectories.pdf}
 \caption{
 Behavioural trajectory structure across perturbation conditions.
-Mean trajectories are shown separately for leftward and rightward perturbations, together with representative successful and failed trajectories under the largest rightward perturbation.
-These panels illustrate how perturbations reshape reach geometry and increase failure risk in the most challenging condition.
+Mean trajectories are shown separately for leftward and rightward perturbations, together with representative successful and failed trials under the largest rightward perturbation.
+The panels show how perturbation magnitude reshapes reach geometry and increases failure risk in the most challenging condition.
 }
 \label{fig:behavioural_trajectories}
 \end{figure*}
@@ -63,7 +63,8 @@ These panels illustrate how perturbations reshape reach geometry and increase fa
 \includegraphics[width=0.90\textwidth]{figures/figure3_behavioural_performance.pdf}
 \caption{
 Behavioural performance summary across perturbation conditions.
-Panels show distributions of episode reward, episode duration, path length, and final lateral error, highlighting the progressive behavioural cost associated with stronger perturbations.
+Panels show distributions of episode reward, episode duration, path length, and final lateral error.
+Together, these measures quantify the progressive behavioural cost associated with stronger perturbations.
 }
 \label{fig:behavioural_performance}
 \end{figure*}
@@ -107,8 +108,8 @@ Because the majority of variables violated normality or homogeneity assumptions,
 \includegraphics[width=0.98\textwidth]{../experiments/version_2_0/results/neural_analysis/manuscript/figure1_neural_summary.pdf}
 \caption{
 Neural population summary across perturbation conditions.
-The panel combines low-dimensional latent structure (policy and value PCA), representational similarity analysis (RSA), and condition decoding confusion matrices.
-Together, these analyses quantify separation and overlap of neural representations across $P0$, $L1$--$L3$, and $R1$--$R3$.
+The panel combines low-dimensional latent structure, representational similarity analysis, and condition-decoding confusion matrices for policy and value representations.
+Together, these analyses quantify separation and overlap among neural states across $P0$, $L1$--$L3$, and $R1$--$R3$.
 }
 \label{fig:neural_summary}
 \end{figure*}
@@ -118,7 +119,7 @@ Together, these analyses quantify separation and overlap of neural representatio
 \includegraphics[width=0.98\textwidth]{../experiments/version_2_0/results/neural_analysis/manuscript/figure2_neural_pca_3d.pdf}
 \caption{
 Three-dimensional PCA of latent neural activity.
-Policy and value latent trajectories are shown in the first three principal components to visualize the geometry of perturbation-dependent neural manifolds.
+Policy and value latent states are projected onto the first three principal components to visualize the geometry of perturbation-dependent neural manifolds.
 }
 \label{fig:neural_pca_3d}
 \end{figure*}
@@ -129,7 +130,7 @@ Policy and value latent trajectories are shown in the first three principal comp
 \caption{
 Neural state trajectories through latent PCA space.
 Each curve traces the temporal evolution of a single episode, with line style distinguishing successful and failed trials.
-These trajectories reveal condition-specific dynamics over time.
+These trajectories reveal condition-specific latent dynamics over time.
 }
 \label{fig:neural_trajectories}
 \end{figure*}
@@ -139,7 +140,7 @@ These trajectories reveal condition-specific dynamics over time.
 \includegraphics[width=0.95\textwidth]{../experiments/version_2_0/results/neural_analysis/manuscript/figure4_success_failure.pdf}
 \caption{
 Success-versus-failure comparison of latent neural states.
-Distributions of principal component scores indicate how neural population activity differs between successful and unsuccessful episodes.
+Distributions of principal component scores show how neural population activity differs between successful and unsuccessful episodes.
 }
 \label{fig:success_failure}
 \end{figure*}
