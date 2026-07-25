@@ -36,6 +36,19 @@ checkpoints/
 
 *.pdf
 
+!paper/figures/*.png
+!paper/figures/*.pdf
+!paper/figures/*.svg
+
+!experiments/version_2_0/results/
+experiments/version_2_0/results/*
+!experiments/version_2_0/results/neural_analysis/
+experiments/version_2_0/results/neural_analysis/*
+!experiments/version_2_0/results/neural_analysis/manuscript/
+!experiments/version_2_0/results/neural_analysis/manuscript/*.png
+!experiments/version_2_0/results/neural_analysis/manuscript/*.pdf
+!experiments/version_2_0/results/neural_analysis/manuscript/figure_manifest.csv
+
 .DS_Store
 Thumbs.db
 
