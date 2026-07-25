@@ -1,36 +1,36 @@
 # Statistical Analysis
 
-The following behavioural metrics will be computed.
+This project reports descriptive and inferential statistics for Experiment 2 perturbation conditions.
 
-## Behaviour
+## Behavioural outcome groups
 
-- Success Rate
-- Collision Rate
-- Timeout Rate
-- Time to Goal
-- Route Selection
-- Path Length
-- Velocity
-- Acceleration
-- Curvature
-- Recovery Time
-- Maximum Deviation
+- Episode reward
+- Episode duration (steps)
+- Path length
+- Mean and maximum speed
+- Peak lateral velocity
+- Maximum heading deviation
+- Final lateral error
+- Success and collision rates
 
-## Neural Population
+## Condition comparisons
 
-- PCA
-- Explained Variance
-- Population Norm
-- Correlation Matrix
-- Hierarchical Clustering
-- Decoder Accuracy
-- Cluster Statistics
+All analyses are condition-wise across:
 
-Comparisons will be performed between
+- `P0` (control)
+- `L1`, `L2`, `L3` (left perturbations)
+- `R1`, `R2`, `R3` (right perturbations)
 
-- Unperturbed
-- Small Perturbation
-- Medium Perturbation
-- Large Perturbation
+## Inferential strategy
 
-for both left and right perturbations.
+1. Assumption checks (normality and homogeneity).
+2. Omnibus tests across conditions.
+3. Holm-corrected pairwise post hoc comparisons where omnibus tests are significant.
+
+Generated manuscript tables are exported by:
+
+```bash
+python -m scripts.analysis.manuscript_statistical_tables
+```
+
+Output files are written to `paper/tables/` in CSV and LaTeX formats.

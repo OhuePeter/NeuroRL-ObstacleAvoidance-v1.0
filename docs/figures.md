@@ -1,52 +1,31 @@
-# Planned Figures
+# Figure Plan (Main Text)
 
-Figure 1
+Main-text figure cap: 8 total.
 
-Computational neuroscience framework.
+## Figure list
 
-Figure 2
+1. `Figure 1`: Adaptive reaching schematic (fixed manuscript schematic).
+2. `Figure 2`: Behavioural trajectory structure across perturbation conditions.
+3. `Figure 3`: Behavioural performance distributions (reward, duration, path length, final lateral error).
+4. `Figure 4`: Behavioural robustness and adaptation metrics.
+5. `Figure 5`: Neural population summary (PCA + RSA + decoding overview).
+6. `Figure 6`: Neural 3D PCA geometry.
+7. `Figure 7`: Neural latent trajectories.
+8. `Figure 8`: Success-versus-failure neural state comparison.
 
-Environment showing
+## Generation commands
 
-- Start
-- Goal
-- Two obstacles
-- Perturbation region
+Run from repository root.
 
-Figure 3
+```bash
+python scripts/plot_reaching_schematic.py
+python -m scripts.analysis.manuscript_behavioral_figures
+python -m scripts.analysis.neural_analysis
+python -m scripts.analysis.manuscript_neural_figures
+```
 
-Trajectory comparison
+## Output locations
 
-Unperturbed
-
-vs
-
-Seven perturbation conditions.
-
-Figure 4
-
-Velocity profiles.
-
-Figure 5
-
-Neural population PCA.
-
-Figure 6
-
-Correlation matrix with hierarchical clustering.
-
-Figure 7
-
-Latent-unit tuning curves.
-
-Figure 8
-
-Population norm.
-
-Figure 9
-
-Behavioural statistics.
-
-Figure 10
-
-Recovery analysis.
+- Behavioural figures: `paper/figures/`
+- Neural figures: `experiments/version_2_0/results/neural_analysis/manuscript/`
+- Schematic: `paper/figures/`

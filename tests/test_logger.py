@@ -1,35 +1,19 @@
-"""
-==========================================================
-Experiment Logger Test
-
-Authors:
-Peter Ohue
-Gunnar Blohm
-==========================================================
-"""
-
 from src.environment.world import World
 from src.environment.physics import PhysicsEngine
 from src.utils.logger import ExperimentLogger
 
 
-def main():
-
+def test_logger_records_rows_and_columns():
     world = World()
-
     physics = PhysicsEngine(
         world.width,
         world.height
     )
-
     logger = ExperimentLogger()
-
     dt = 0.1
-
     action = (0.0, 1.0)
 
-    for step in range(20):
-
+    for step in range(5):
         physics.update(
             world.agent,
             action,
@@ -84,15 +68,33 @@ def main():
         )
 
     df = logger.dataframe()
-
-    print(df.head())
-
-    print()
-
-    print(df.columns)
-
-    logger.save("experiment_001.csv")
+    assert len(df) == 5
+    assert "x" in df.columns
+    assert "goal_distance" in df.columns
+    assert "success" in df.columns
 
 
-if __name__ == "__main__":
-    main()
+def test_logger_save_writes_csv(tmp_path):
+    world = World()
+    logger = ExperimentLogger()
+
+    logger.log(
+        episode=1,
+        trial=1,
+        step=1,
+        time=0.1,
+        seed=42,
+        condition="P0",
+        agent=world.agent,
+        goal_distance=1.0,
+        obstacle1_distance=2.0,
+        obstacle2_distance=2.0,
+        reward=0.0,
+        success=False,
+        collision=False,
+        route="Centre"
+    )
+
+    out_file = tmp_path / "behaviour.csv"
+    logger.save(out_file)
+    assert out_file.exists()

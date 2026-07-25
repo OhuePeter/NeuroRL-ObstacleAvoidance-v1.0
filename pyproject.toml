@@ -28,6 +28,9 @@ dependencies = [
     "jupyter",
 ]
 
+[project.scripts]
+neurorl-run = "src.cli.run_pipeline:main"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*"]
