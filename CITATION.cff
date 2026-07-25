@@ -3,9 +3,7 @@ cff-version: 1.2.0
 title: NeuroRL-ObstacleAvoidance-v1.0
 
 message: >
-  If you use this software, please cite the accompanying manuscript.
-
-## Authors
+  If you use this software, please cite this repository and the accompanying manuscript.
 
 authors:
   - family-names: Ohue
@@ -21,3 +19,7 @@ date-released: 2026
 license: MIT
 
 repository-code: https://github.com/OhuePeter/NeuroRL-ObstacleAvoidance-v1.0
+
+url: https://github.com/OhuePeter/NeuroRL-ObstacleAvoidance-v1.0
+
+type: software

@@ -1,45 +1,37 @@
 # Methodology
 
-The project consists of four major stages.
+The methodology follows a train-then-perturb protocol inspired by motor-control perturbation experiments.
 
-## Environment
+## Stage 1: Environment definition
 
-A two-dimensional obstacle avoidance task.
+- Two-dimensional reaching workspace.
+- Fixed start and goal locations.
+- Central obstacle geometry that enforces non-trivial trajectories.
 
-Two static obstacles create three possible trajectories
+## Stage 2: Policy training
 
-- Left
-- Centre
-- Right
+- PPO controller is trained for obstacle-avoiding goal reaching.
+- Perturbations are disabled during training.
+- Checkpoints and logs are stored under experiment output folders.
 
----
+## Stage 3: Frozen-policy evaluation under perturbation
 
-## Training
+- Trained policy parameters are frozen.
+- Evaluation conditions: `P0`, `L1`, `L2`, `L3`, `R1`, `R2`, `R3`.
+- Perturbation is triggered once when entering the trigger region.
+- Behavioural trajectories, kinematics, rewards, and latent neural states are recorded.
 
-The PPO agent learns
+## Stage 4: Behavioural and neural analysis
 
-- Goal reaching
-- Obstacle avoidance
+Behavioural analysis includes:
 
-Perturbations are disabled.
+- Success and collision outcomes
+- Episode duration and path-length effects
+- Lateral error and adaptation metrics
 
----
+Neural analysis includes:
 
-## Evaluation
-
-The trained policy is evaluated using seven perturbation conditions.
-
-Behaviour and neural activity are recorded.
-
----
-
-## Neural Analysis
-
-Hidden layer activity is analysed using
-
-- PCA
-- Correlation analysis
-- Hierarchical clustering
-- Population norms
-- Neural decoding
-- Latent-unit tuning
+- PCA geometry of latent states
+- Condition-level representational similarity
+- Perturbation-condition decoding performance
+- Success-versus-failure latent separation

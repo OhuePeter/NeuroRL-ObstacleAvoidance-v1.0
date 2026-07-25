@@ -1,0 +1,9 @@
+file,type
+paper\tables\table1_descriptive_statistics.tex,tex
+paper\tables\table1_descriptive_statistics.csv,csv
+paper\tables\table2_assumption_tests.tex,tex
+paper\tables\table2_assumption_tests.csv,csv
+paper\tables\table3_omnibus_tests.tex,tex
+paper\tables\table3_omnibus_tests.csv,csv
+paper\tables\table4_pairwise_posthoc.tex,tex
+paper\tables\table4_pairwise_posthoc.csv,csv

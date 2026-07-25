@@ -1,66 +1,45 @@
-"""
-==========================================================
-Environment Test
-
-Authors:
-Peter Ohue
-Gunnar Blohm
-==========================================================
-"""
-
 import numpy as np
 
 from src.environment.environment import NeuroRLEnvironment
 
 
-def main():
-
+def test_environment_reset_shape_and_info_keys():
     env = NeuroRLEnvironment()
 
     observation, info = env.reset()
 
-    print("=" * 60)
-    print("INITIAL OBSERVATION")
-    print("=" * 60)
+    assert observation.shape == (12,)
+    assert "goal_distance" in info
+    assert "goal_reached" in info
+    assert "collision" in info
 
-    print(observation)
 
-    print()
+def test_environment_step_returns_valid_types():
+    env = NeuroRLEnvironment()
+    env.reset()
 
-    for step in range(10):
+    action = np.array([0.0, 1.0], dtype=np.float32)
+    observation, reward, terminated, truncated, info = env.step(action)
 
-        action = np.array(
-            [0.0, 1.0],
-            dtype=np.float32
-        )
+    assert observation.shape == (12,)
+    assert isinstance(float(reward), float)
+    assert isinstance(terminated, bool)
+    assert isinstance(truncated, bool)
+    assert "goal_distance" in info
+    assert "step" in info
 
-        observation, reward, terminated, truncated, info = env.step(action)
 
-        print(f"Step {step + 1:02d}")
+def test_environment_progresses_over_multiple_steps():
+    env = NeuroRLEnvironment()
+    env.reset()
+    action = np.array([0.0, 1.0], dtype=np.float32)
 
-        print(f"Reward      : {reward:.3f}")
-
-        print(
-            f"Position    : ({observation[0]:.2f}, {observation[1]:.2f})"
-        )
-
-        print(
-            f"Goal Distance : {observation[10]:.2f}"
-        )
-
-        print(
-            f"Heading       : {observation[11]:.2f}"
-        )
-
-        print()
-
+    final_info = None
+    for _ in range(5):
+        _, _, terminated, truncated, info = env.step(action)
+        final_info = info
         if terminated or truncated:
             break
 
-    print("=" * 60)
-    print("Environment working successfully.")
-    print("=" * 60)
-
-
-if __name__ == "__main__":
-    main()
+    assert final_info is not None
+    assert final_info["step"] >= 1

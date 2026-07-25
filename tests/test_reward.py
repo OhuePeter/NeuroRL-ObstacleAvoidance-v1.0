@@ -1,18 +1,7 @@
-"""
-==========================================================
-Reward Function Test
-
-Authors:
-Peter Ohue
-Gunnar Blohm
-==========================================================
-"""
-
 from src.environment.reward import RewardFunction
 
 
-def main():
-
+def test_reward_contains_expected_components_and_total():
     reward = RewardFunction()
 
     results = reward.compute_total_reward(
@@ -33,14 +22,21 @@ def main():
 
     )
 
-    print("=" * 60)
-    print("REWARD BREAKDOWN")
-    print("=" * 60)
+    expected = {
+        "goal",
+        "collision",
+        "progress",
+        "distance",
+        "clearance",
+        "smoothness",
+        "time",
+        "total",
+    }
 
-    for key, value in results.items():
+    assert expected.issubset(set(results.keys()))
 
-        print(f"{key:12s}: {value:.3f}")
+    component_sum = sum(
+        value for key, value in results.items() if key != "total"
+    )
 
-
-if __name__ == "__main__":
-    main()
+    assert abs(component_sum - results["total"]) < 1e-10

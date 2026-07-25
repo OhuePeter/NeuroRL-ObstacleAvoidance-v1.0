@@ -1,12 +1,4 @@
-"""
-==========================================================
-Recorder Test
-
-Authors:
-Peter Ohue
-Gunnar Blohm
-==========================================================
-"""
+import json
 
 from src.utils.recorder import ExperimentRecorder
 from src.utils.logger import ExperimentLogger
@@ -31,9 +23,8 @@ class DummyAgent:
         self.heading = 1.57
 
 
-def main():
-
-    recorder = ExperimentRecorder()
+def test_recorder_creates_experiment_and_writes_artifacts(tmp_path):
+    recorder = ExperimentRecorder(root=tmp_path)
 
     recorder.create_experiment()
 
@@ -106,14 +97,11 @@ def main():
 
     recorder.save_readme()
 
-    print()
+    assert recorder.path.exists()
+    assert recorder.behaviour_path.exists()
+    assert (recorder.path / "metadata.json").exists()
+    assert (recorder.path / "summary.json").exists()
+    assert (recorder.path / "README.txt").exists()
 
-    print("=" * 60)
-    print("Experiment Successfully Created")
-    print("=" * 60)
-
-    print(recorder.path)
-
-
-if __name__ == "__main__":
-    main()
+    metadata = json.loads((recorder.path / "metadata.json").read_text(encoding="utf-8"))
+    assert metadata["condition"] == "P0"

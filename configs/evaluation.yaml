@@ -1,0 +1,17 @@
+evaluation:
+
+  episodes_per_condition: 100
+
+  deterministic_policy: true
+
+  save_trajectories: true
+
+  save_kinematics: true
+
+  save_neural_activity: true
+
+  save_episode_video: false
+
+  output_root: experiments/version_2_0/results
+
+  random_seed: 42

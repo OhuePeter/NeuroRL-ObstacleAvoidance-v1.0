@@ -1,17 +1,23 @@
 # Project Overview
 
-NeuroRL-ObstacleAvoidance-v1.0 investigates how neural population dynamics emerge in reinforcement learning agents performing adaptive obstacle avoidance.
+NeuroRL-ObstacleAvoidance-v1.0 studies behavioural adaptation and latent neural population dynamics in a reinforcement learning controller.
 
-Unlike previous versions, perturbations are introduced only during evaluation.
+The key design choice is that perturbations are withheld during training and introduced only at evaluation time, enabling direct analysis of online compensation rather than perturbation-specific training.
 
-The framework is inspired by computational neuroscience and biological motor control.
+## Core components
 
-The project integrates
+- Reinforcement learning (PPO controller)
+- Goal-directed obstacle-avoidance environment
+- Behavioural performance analysis
+- Neural population analysis from latent activations
+- Statistical and publication-ready visualization pipeline
 
-- Reinforcement Learning
-- Neural Population Analysis
-- Behavioural Analysis
-- Statistical Analysis
-- Scientific Visualization
+## Scientific objective
 
-The long-term objective is to bridge computational neuroscience, rehabilitation, and robotics.
+Evaluate whether adaptation-like structure emerges in latent policy/value representations when a trained controller faces unexpected perturbations.
+
+## Outputs
+
+- Reproducible evaluation results across perturbation conditions
+- Manuscript-ready figures and statistical tables
+- Manuscript source and supporting documentation

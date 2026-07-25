@@ -1,3 +1,4 @@
+*.egg-info/
 __pycache__/
 
 *.pyc
@@ -5,6 +6,7 @@ __pycache__/
 .ipynb_checkpoints/
 
 .env
+.venv/
 
 .vscode/
 
@@ -35,3 +37,6 @@ checkpoints/
 *.pdf
 
 .DS_Store
+Thumbs.db
+
+presentation/poster/output/

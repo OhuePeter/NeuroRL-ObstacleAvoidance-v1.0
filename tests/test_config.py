@@ -1,30 +1,20 @@
 from src.utils.config import ConfigLoader
 
 
-def main():
-
+def test_load_environment_has_expected_sections():
     env = ConfigLoader.load_environment()
 
+    assert isinstance(env, dict)
+    assert "environment" in env
+    assert "agent" in env
+    assert "goal" in env
+    assert "obstacles" in env
+
+
+def test_load_perturbation_has_conditions():
     perturb = ConfigLoader.load_perturbation()
 
-    print("=" * 50)
-
-    print("Environment Configuration")
-
-    print("=" * 50)
-
-    print(env)
-
-    print()
-
-    print("=" * 50)
-
-    print("Perturbation Configuration")
-
-    print("=" * 50)
-
-    print(perturb)
-
-
-if __name__ == "__main__":
-    main()
+    assert isinstance(perturb, dict)
+    assert "perturbation" in perturb
+    assert "conditions" in perturb["perturbation"]
+    assert "P0" in perturb["perturbation"]["conditions"]
