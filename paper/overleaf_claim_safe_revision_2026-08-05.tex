@@ -1,0 +1,112 @@
+% ==========================================================
+% Overleaf Claim-Safe Revision (2026-08-05)
+% Purpose:
+% 1) Keep author voice
+% 2) Remove statements not demonstrated by current analyses/results
+% 3) Provide paste-ready replacement text
+% ==========================================================
+
+\section{Introduction}
+\label{sec:introduction_revised}
+
+In this study, we use PPO to learn an obstacle-avoidance reaching policy, then probe it in the same experimental spirit used in motor-control studies: graded external perturbations, trial-by-trial behavioural readouts, and internal-state analysis during movement. In parallel, we record the policy network's hidden-layer activity and analyze it as population data using dimensionality reduction, latent trajectory analysis, clustering, and decoding. The objective is straightforward: identify which latent signals track perturbation level, movement adaptation, and success versus failure.
+
+Our contributions are threefold. First, we present a practical workflow for treating policy hidden activity as neural population data. Second, we quantify behavioural adaptation across graded perturbation magnitudes and directions. Third, we link behavioural failure modes to measurable shifts in low-dimensional latent-state geometry.
+
+\section{Methodology}
+\label{sec:methodology_revised}
+
+\subsection{Experimental Framework}
+
+The task is implemented in the Gymnasium interface with continuous actions and physics-constrained state updates. Training and evaluation use Stable-Baselines3 PPO with an MLP policy architecture (two hidden layers of 256 units). The agent performs goal-directed obstacle avoidance in a two-dimensional workspace with two static circular obstacles and a fixed target.
+
+To probe robustness, we evaluate seven perturbation conditions: one control condition (P0) and six lateral perturbation conditions (L1--L3, R1--R3). Perturbations are applied as horizontal forces with trial-to-trial onset jitter in the early movement phase, specifically $t_0 \in [35,46)$, and remain active for 14 control steps. The calibrated force magnitudes are:
+\begin{align}
+\text{L1} &= -0.40, & \text{L2} &= -0.60, & \text{L3} &= -0.85, \\
+\text{R1} &= +0.40, & \text{R2} &= +0.65, & \text{R3} &= +1.80.
+\end{align}
+
+Evaluation includes controlled trial-to-trial variability in start position, observation noise, and action noise.
+
+\subsection{State Representation and Reward Components}
+
+The observation vector is 13-dimensional and combines absolute kinematics, relative geometry, and task cues:
+\begin{align}
+\mathbf{s}_t = [&x_t, y_t, v_{x,t}, v_{y,t}, g_x-x_t, g_y-y_t, \\
+& o_{1x}-x_t, o_{1y}-y_t, o_{2x}-x_t, o_{2y}-y_t, d_{g,t}, \psi_t, r_t],
+\end{align}
+where $d_{g,t}=\lVert \mathbf{g}-\mathbf{p}_t \rVert$, $\psi_t$ is heading, and $r_t\in\{-1,0,1\}$ is the route signal.
+
+The reward combines terminal and shaping terms for goal attainment, collision avoidance, progress, distance, clearance, smoothness, elapsed time, and route shaping within the obstacle corridor.
+
+\subsection{Training and Evaluation Protocol}
+
+PPO training is performed for $3\times10^6$ environment timesteps with learning rate $3\times10^{-4}$, discount factor $\gamma=0.99$, GAE $\lambda=0.95$, clip range $0.2$, entropy coefficient $0.01$, value coefficient $0.5$, and maximum gradient norm $0.5$. Evaluation in Experiment 2 is performed with 20 episodes per perturbation condition.
+
+\subsection{Neural and Behavioural Analyses}
+
+Behavioural analyses include success rate, collision rate, reward, episode duration, path length, speed, peak lateral velocity, and final lateral error. Neural analyses include PCA of latent activity, condition-structured latent trajectories, representational similarity, condition decoding, success/failure latent comparisons, and unsupervised clustering with silhouette-based model selection.
+
+\section{Results (Claim-Safe)}
+\label{sec:results_claim_safe}
+
+The robustness profile shows a clear graded pattern rather than trivial perfection. Success rates were 100\% for P0, L1, L2, and R1; 90\% for L3; 85\% for R2; and 50\% for R3. This pattern indicates strong adaptation in mild and moderate regimes with a selective breakdown under the strongest rightward perturbation.
+
+Cumulative trajectory overlays confirm condition-dependent route deformation and failure emergence in high-force conditions. Velocity-phase analyses show direction-specific lateral signatures during the perturbation interval, and speed modulation indicates stronger compensation demands as perturbation intensity increases. Latent PCA reveals structured low-dimensional organization, and clustering results identify separable latent regimes with quantifiable silhouette support. Decoding and success-prediction analyses further show that behaviourally relevant information remains linearly accessible in latent or derived behavioural features.
+
+\section{Removed or Softened Claims}
+\label{sec:removed_claims}
+
+The following statements were removed or softened because they are not directly demonstrated by the current result set:
+\begin{itemize}
+\item Explicit biological analog claims (for example, direct ``M1--cerebellar'' equivalence) beyond computational inspiration.
+\item Claims of causal neural mechanisms from clustering/decoding alone.
+\item Any perturbation protocol description using steps 50--55 or magnitudes $\pm0.15, \pm0.30, \pm0.45$.
+\item Any statement that observations were normalized with VecNormalize in the current run.
+\item Any claim requiring multi-seed uncertainty unless multi-seed analyses are added.
+\end{itemize}
+
+\section{Journal Readiness Assessment}
+\label{sec:journal_readiness}
+
+\textbf{Nature-tier general journals (for example, Nature / Nature Neuroscience):} Not yet competitive in current form. Main gap is breadth and depth of validation (multi-seed reproducibility, stronger baselines, causal/ablation evidence, and broader significance framing).
+
+\textbf{PLOS-tier and strong specialist journals:} Potentially viable after focused revision. The technical arc is coherent, analyses are substantially improved, and the robustness profile is interpretable. Remaining work is mostly in rigor reinforcement and framing discipline.
+
+\textbf{Current recommendation:}
+Prioritize a strong specialist venue first, unless you add multi-seed and ablation evidence quickly.
+
+\section{How to Improve Without Changing Voice}
+\label{sec:voice_preserving_improvements}
+
+Use short, concrete, first-principles statements. Keep your direct style, but remove rhetorical inflation. The pattern that reads as human and professional is:
+\begin{itemize}
+\item what was done,
+\item what was measured,
+\item what changed,
+\item where it failed,
+\item what remains uncertain.
+\end{itemize}
+
+Preferred sentence pattern example:
+\begin{quote}
+``We tested seven perturbation conditions. Performance remained ceiling-level through moderate perturbations, then declined asymmetrically in high rightward force. This failure regime was accompanied by distinct shifts in low-dimensional latent structure.''
+\end{quote}
+
+Avoid this style:
+\begin{quote}
+``Our novel and groundbreaking framework conclusively demonstrates biologically realistic intelligence.''
+\end{quote}
+
+\section{Implementation Checklist for Overleaf}
+\label{sec:implementation_checklist}
+
+\begin{enumerate}
+\item Replace your current Introduction + Methodology paragraphs with Sections~\ref{sec:introduction_revised} and \ref{sec:methodology_revised} above.
+\item Replace old perturbation equation text with calibrated protocol values and onset-jitter window.
+\item Update state equation to the 13-D representation.
+\item Keep results claims tied to measured outputs only (success/collision/trajectory/velocity/PCA/clustering/decoding).
+\item Add a short limitations paragraph: single-seed scope, no causal proof from correlational analyses, and no baseline-ablation sweep yet.
+\end{enumerate}
+
+% End of claim-safe revision file.
