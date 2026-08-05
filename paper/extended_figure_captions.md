@@ -1,13 +1,16 @@
-# Extended Figure Captions (Draft)
+# Extended Figure Captions (Revised)
 
-## Figure 5 (7-panel trajectories)
-Each panel shows one perturbation condition (P0, L1-L3, R1-R3). Green traces are successful reaches and red traces are unsuccessful attempts. The starting position is fixed and explicitly marked in every panel. Direction arrows indicate the perturbation side so the behavioural adaptation can be read directly from trajectory geometry.
+## Figure 5: Adaptive route geometry under graded perturbations
+All perturbation conditions are shown together to expose the full robustness envelope in one view. The shaded corridor marks the perturbation zone between movement onset and obstacle approach. Condition color identifies force level and direction; dashed paths denote failures. This panel emphasizes that robust obstacle avoidance is preserved in mild-to-moderate perturbations and breaks down selectively in the strongest rightward regime.
 
-## Figure 6 (velocity change)
-Top panel shows condition-wise mean speed profiles across movement time. Bottom panel shows lateral velocity (vx), where sign and amplitude track the perturbation direction and compensation dynamics. The shaded epoch marks the perturbation window.
+## Figure 6: Velocity signatures of perturbation compensation
+Top panel shows median lateral velocity with interquartile bands across normalized movement phase. Bottom panel shows speed modulation relative to movement onset. The perturbation phase is shaded, making direction-specific divergence and compensation dynamics immediately visible.
 
-## Figure 7 (PCA, tuning, correlation)
-Left: latent PCA organization by perturbation condition. Middle: perturbation tuning curve showing how success changes with perturbation level by side. Right: correlation matrix of behavioural metrics to reveal coupled changes in kinematics, error, and reward.
+## Figure 7: Clean latent PCA and unsupervised clustering
+Policy latent activity is visualized in PC1-PC2 space with explicit variance contributions shown in axis labels and title. Unsupervised clustering identifies discrete latent regimes and reports the best silhouette-supported cluster count, quantifying latent-state structure rather than relying on visual impression alone.
 
-## Figure 8 (learning + prediction)
-Left: learning curve from evaluation checkpoints across training timesteps. Right: success-prediction performance from behavioural features, shown as a confusion matrix with ROC inset. This panel quantifies how well trial outcome can be predicted from measured behavioural state variables.
+## Figure 8: Learning dynamics, perturbation tuning, and prediction drivers
+The panel combines checkpoint evaluation trajectory, optimization-time reward evolution, signed perturbation tuning (success and collision rates), and interpretable prediction coefficients with ROC inset. Together, these analyses reveal not only whether the policy works, but where and why it fails under stronger perturbations.
+
+## Figure 9: Nashed-style route-family replication
+Trajectories are grouped by obstacle-crossing route family (left, middle, right), preserving condition color and outcome style. This layout reproduces route-family analysis in a cleaner, condition-aware format that supports direct comparison of adaptation and failure topologies.
