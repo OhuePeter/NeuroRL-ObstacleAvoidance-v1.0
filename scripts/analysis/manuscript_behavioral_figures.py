@@ -54,6 +54,18 @@ START = (5.0, 1.0)
 GOAL = (5.0, 6.6)
 
 
+def _export_figure(fig, stem):
+
+    outputs = []
+
+    for suffix in [".png", ".pdf", ".svg"]:
+        path = OUT / f"{stem}{suffix}"
+        fig.savefig(path, bbox_inches="tight")
+        outputs.append(path)
+
+    return outputs
+
+
 def set_style():
 
     sns.set_theme(style="ticks", context="paper")
@@ -126,9 +138,11 @@ def load_trajectories():
             row = summary.loc[episode]
             condition_trajectories.append(
                 {
+                    "condition": condition,
                     "episode": episode,
                     "success": bool(row["success"]),
                     "collision": bool(row["collision"]),
+                    "desired_route": row.get("desired_route", "either"),
                     "xy": df[["x", "y"]].to_numpy(),
                 }
             )
@@ -164,6 +178,22 @@ def _mean_path(trajectories, success_only=True):
 
     stack = np.stack(paths, axis=0)
     return stack.mean(axis=0)
+
+
+def _pick_trials(trajectories, desired_route=None, success=None, n=3):
+
+    selected = []
+
+    for item in trajectories:
+        if desired_route is not None and item.get("desired_route") != desired_route:
+            continue
+        if success is not None and bool(item["success"]) != bool(success):
+            continue
+        selected.append(item)
+        if len(selected) >= n:
+            break
+
+    return selected
 
 
 def _draw_workspace(ax):
@@ -215,37 +245,44 @@ def figure2_trajectories(summary_df, trajectories):
 
     ax = axes[2]
     _draw_workspace(ax)
-    ax.set_title("Large-right representative trials")
-    r3_trials = trajectories.get("R3", [])
+    ax.set_title("Rightward successes and failed right-perturbation trials")
 
-    successes = [item for item in r3_trials if item["success"]][:3]
-    failures = [item for item in r3_trials if not item["success"]][:3]
+    rightward_successes = (
+        _pick_trials(trajectories.get("P0", []), desired_route="right", success=True, n=2)
+        + _pick_trials(trajectories.get("R1", []), desired_route="right", success=True, n=2)
+    )
 
-    for item in successes:
+    failed_right_perturbations = (
+        _pick_trials(trajectories.get("R2", []), success=False, n=2)
+        + _pick_trials(trajectories.get("R3", []), success=False, n=2)
+    )
+
+    for item in rightward_successes:
         path = item["xy"]
-        ax.plot(path[:, 0], path[:, 1], color=PALETTE["R3"], linewidth=1.6, alpha=0.85)
+        color = PALETTE[item["condition"]]
+        ax.plot(path[:, 0], path[:, 1], color=color, linewidth=1.7, alpha=0.90)
 
-    for item in failures:
+    for item in failed_right_perturbations:
         path = item["xy"]
-        ax.plot(path[:, 0], path[:, 1], color="#6D597A", linewidth=1.6, linestyle="--", alpha=0.9)
+        failure_color = PALETTE[item["condition"]]
+        ax.plot(path[:, 0], path[:, 1], color=failure_color, linewidth=1.7, linestyle="--", alpha=0.95)
 
     ax.legend(
         handles=[
-            plt.Line2D([0], [0], color=PALETTE["R3"], lw=2, label="Success"),
-            plt.Line2D([0], [0], color="#6D597A", lw=2, linestyle="--", label="Failure"),
+            plt.Line2D([0], [0], color=PALETTE["P0"], lw=2, label="P0 right-cue success"),
+            plt.Line2D([0], [0], color=PALETTE["R1"], lw=2, label="R1 right-cue success"),
+            plt.Line2D([0], [0], color=PALETTE["R2"], lw=2, linestyle="--", label="R2 failure"),
+            plt.Line2D([0], [0], color=PALETTE["R3"], lw=2, linestyle="--", label="R3 failure"),
         ],
         frameon=False,
         loc="upper left",
     )
     _panel_label(ax, "C")
 
-    png = OUT / "figure2_behavioural_trajectories.png"
-    pdf = OUT / "figure2_behavioural_trajectories.pdf"
-    fig.savefig(png, bbox_inches="tight")
-    fig.savefig(pdf, bbox_inches="tight")
+    outputs = _export_figure(fig, "figure2_behavioural_trajectories")
     plt.close(fig)
 
-    return [png, pdf]
+    return outputs
 
 
 def figure3_performance(summary_df):
@@ -260,49 +297,78 @@ def figure3_performance(summary_df):
     ]
 
     order = CONDITIONS
-    palette = [PALETTE[c] for c in order]
+
+    condition_index = {condition: i for i, condition in enumerate(order)}
+    summary_df = summary_df.copy()
+    summary_df["condition_index"] = summary_df["condition"].map(condition_index)
+
+    mean_df = (
+        summary_df.groupby("condition", as_index=False)
+        .agg(
+            reward_mean=("reward", "mean"),
+            reward_std=("reward", "std"),
+            reward_n=("reward", "size"),
+            steps_mean=("steps", "mean"),
+            steps_std=("steps", "std"),
+            steps_n=("steps", "size"),
+            path_length_mean=("path_length", "mean"),
+            path_length_std=("path_length", "std"),
+            path_length_n=("path_length", "size"),
+            final_lateral_error_mean=("final_lateral_error", "mean"),
+            final_lateral_error_std=("final_lateral_error", "std"),
+            final_lateral_error_n=("final_lateral_error", "size"),
+        )
+    )
+    mean_df["condition_index"] = mean_df["condition"].map(condition_index)
 
     for ax, (metric, title, label) in zip(axes.flatten(), plot_specs):
-        sns.boxplot(
-            data=summary_df,
-            x="condition",
-            y=metric,
-            hue="condition",
-            order=order,
-            palette=palette,
-            linewidth=1.2,
-            fliersize=0,
-            dodge=False,
-            ax=ax,
-        )
-        legend = ax.get_legend()
-        if legend is not None:
-            legend.remove()
+        x = mean_df["condition_index"].to_numpy()
+        y = mean_df[f"{metric}_mean"].to_numpy()
+        std = mean_df[f"{metric}_std"].to_numpy()
+        n = mean_df[f"{metric}_n"].to_numpy()
+        ci = 1.96 * (std / np.sqrt(n))
 
-        sns.stripplot(
-            data=summary_df,
-            x="condition",
-            y=metric,
-            order=order,
-            color="black",
-            size=2.5,
-            alpha=0.45,
-            jitter=0.18,
-            ax=ax,
+        for condition in order:
+            cdf = summary_df[summary_df["condition"] == condition]
+            ax.scatter(
+                cdf["condition_index"],
+                cdf[metric],
+                s=10,
+                alpha=0.35,
+                color=PALETTE[condition],
+                linewidths=0,
+            )
+
+        ax.plot(
+            x,
+            y,
+            color="#1D3557",
+            linewidth=2.2,
+            marker="o",
+            markersize=4,
         )
+
+        ax.fill_between(
+            x,
+            y - ci,
+            y + ci,
+            color="#1D3557",
+            alpha=0.16,
+            linewidth=0,
+        )
+
+        ax.set_xticks(range(len(order)))
+        ax.set_xticklabels(order)
         ax.set_title(title)
         ax.set_xlabel("")
         ax.set_ylabel("")
         ax.tick_params(axis="x", labelrotation=0)
         _panel_label(ax, label)
 
-    png = OUT / "figure3_behavioural_performance.png"
-    pdf = OUT / "figure3_behavioural_performance.pdf"
-    fig.savefig(png, bbox_inches="tight")
-    fig.savefig(pdf, bbox_inches="tight")
+    outputs = _export_figure(fig, "figure3_behavioural_performance")
     plt.close(fig)
 
-    return [png, pdf]
+    return outputs
 
 
 def figure4_adaptation(summary_df):
@@ -342,13 +408,10 @@ def figure4_adaptation(summary_df):
         ax.set_ylabel("")
         _panel_label(ax, label)
 
-    png = OUT / "figure4_behavioural_adaptation.png"
-    pdf = OUT / "figure4_behavioural_adaptation.pdf"
-    fig.savefig(png, bbox_inches="tight")
-    fig.savefig(pdf, bbox_inches="tight")
+    outputs = _export_figure(fig, "figure4_behavioural_adaptation")
     plt.close(fig)
 
-    return [png, pdf]
+    return outputs
 
 
 def save_manifest(paths):
