@@ -132,12 +132,7 @@ def main():
 
         folder = ROOT / f"evaluation_{condition}"
 
-        print(f"\n{condition}")
-        print(folder)
-
         files = sorted(folder.glob("trajectory_*.csv"))
-
-        print(f"Found {len(files)} trajectory files")
 
         for trajectory_file in files:
 
@@ -152,12 +147,6 @@ def main():
                 metadata = json.load(f)
 
             trajectory = pd.read_csv(trajectory_file)
-
-            print(
-                trajectory_file.name,
-                trajectory.shape,
-                trajectory.head()
-            )
 
             route = classify_route(trajectory)
 
@@ -237,19 +226,25 @@ def main():
 
     plt.tight_layout(rect=[0,0,1,0.93])
 
-    output = ROOT / "nashed_style_trajectories.png"
+    outputs = [
+        ROOT / "nashed_style_trajectories.png",
+        ROOT / "nashed_style_trajectories.pdf",
+        ROOT / "nashed_style_trajectories.svg",
+    ]
 
-    plt.savefig(
-        output,
-        dpi=600,
-        bbox_inches="tight",
-    )
+    for output in outputs:
+        plt.savefig(
+            output,
+            dpi=600 if output.suffix == ".png" else None,
+            bbox_inches="tight",
+        )
 
-    plt.show()
+    plt.close(fig)
 
     print()
     print("="*60)
-    print(output)
+    for output in outputs:
+        print(output)
     print("="*60)
 
 

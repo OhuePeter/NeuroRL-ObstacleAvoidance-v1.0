@@ -24,10 +24,15 @@ class ObservationBuilder:
     Builds the observation vector.
     """
 
-    def build(self, world):
+    def build(self, world, target_position=None):
+
+        route_signal = {
+            "left": -1.0,
+            "right": 1.0,
+        }.get(world.desired_route, 0.0)
 
         agent = world.agent
-        goal = world.goal
+        goal_x, goal_y = target_position if target_position is not None else world.goal.position
 
         obstacle1 = world.obstacles[0]
         obstacle2 = world.obstacles[1]
@@ -52,8 +57,8 @@ class ObservationBuilder:
             # Relative Goal Position
             # -----------------------------
 
-            goal.x - agent.x,
-            goal.y - agent.y,
+            goal_x - agent.x,
+            goal_y - agent.y,
 
             # -----------------------------
             # Relative Obstacle 1 Position
@@ -74,15 +79,21 @@ class ObservationBuilder:
             # -----------------------------
 
             np.linalg.norm([
-                goal.x - agent.x,
-                goal.y - agent.y
+                goal_x - agent.x,
+                goal_y - agent.y
             ]),
 
             # -----------------------------
             # Heading
             # -----------------------------
 
-            agent.heading
+            agent.heading,
+
+            # -----------------------------
+            # Desired Route Cue
+            # -----------------------------
+
+            route_signal
 
         ], dtype=np.float32)
 

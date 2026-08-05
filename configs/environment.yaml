@@ -32,6 +32,23 @@ training:
 
   perturbations: false
 
+  route_balancing:
+
+    enabled: true
+    mode: alternating
+    corridor_mid_y_min: 3.5
+    corridor_mid_y_max: 6.5
+    target_offset_x: 1.80
+    waypoint_y: 5.00
+    waypoint_tolerance: 0.45
+    shaping_scale: 0.35
+
 evaluation:
 
   perturbations: true
+
+  start_position_jitter_std: 0.01
+  observation_noise_std: 0.01
+  action_noise_std: 0.02
+  perturbation_step_min: 35
+  perturbation_step_max: 46

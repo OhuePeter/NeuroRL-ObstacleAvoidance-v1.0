@@ -35,6 +35,18 @@ CONDITIONS = ["P0", "L1", "L2", "L3", "R1", "R2", "R3"]
 PALETTE = dict(zip(CONDITIONS, sns.color_palette("tab10", len(CONDITIONS))))
 
 
+def _export_figure(fig, stem):
+
+    outputs = []
+
+    for suffix in [".png", ".pdf", ".svg"]:
+        path = OUT / f"{stem}{suffix}"
+        fig.savefig(path, bbox_inches="tight")
+        outputs.append(path)
+
+    return outputs
+
+
 def set_style():
 
     sns.set_theme(style="ticks", context="paper")
@@ -253,14 +265,10 @@ def figure1_neural_summary(data):
 
     fig.suptitle("Neural population summary across perturbation conditions", fontsize=13, y=1.02)
 
-    png = OUT / "figure1_neural_summary.png"
-    pdf = OUT / "figure1_neural_summary.pdf"
-
-    fig.savefig(png, bbox_inches="tight")
-    fig.savefig(pdf, bbox_inches="tight")
+    outputs = _export_figure(fig, "figure1_neural_summary")
     plt.close(fig)
 
-    return [png, pdf]
+    return outputs
 
 
 def _plot_3d(ax, df, title):
@@ -302,33 +310,32 @@ def figure2_pca_3d(data):
     handles, labels = ax2.get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper center", ncol=7, frameon=False)
 
-    png = OUT / "figure2_neural_pca_3d.png"
-    pdf = OUT / "figure2_neural_pca_3d.pdf"
-
-    fig.savefig(png, bbox_inches="tight")
-    fig.savefig(pdf, bbox_inches="tight")
+    outputs = _export_figure(fig, "figure2_neural_pca_3d")
     plt.close(fig)
 
-    return [png, pdf]
+    return outputs
 
 
 def _select_episodes(episode_df, per_condition=2):
 
     picks = []
 
-    for condition in CONDITIONS:
-        subset = episode_df[episode_df["condition"] == condition].copy()
-        if subset.empty:
-            continue
+    for condition in ["P0", "R1"]:
+        subset = episode_df[
+            (episode_df["condition"] == condition)
+            & (episode_df.get("desired_route", "either") == "right")
+            & (episode_df["success"] == True)
+        ].copy()
+        if not subset.empty:
+            picks.append(subset.head(per_condition))
 
-        success = subset[subset["success"] == True].head(per_condition)
-        failure = subset[subset["success"] == False].head(1)
-
-        chosen = pd.concat([success, failure], ignore_index=True)
-        if len(chosen) > per_condition + 1:
-            chosen = chosen.head(per_condition + 1)
-
-        picks.append(chosen)
+    for condition in ["R2", "R3"]:
+        subset = episode_df[
+            (episode_df["condition"] == condition)
+            & (episode_df["success"] == False)
+        ].copy()
+        if not subset.empty:
+            picks.append(subset.head(1))
 
     if not picks:
         return pd.DataFrame(columns=episode_df.columns)
@@ -348,14 +355,15 @@ def _plot_trajectory_set(ax, score_df, selected_eps, title):
 
         condition = row["condition"]
         linestyle = "-" if bool(row["success"]) else "--"
+        alpha = 0.90 if bool(row["success"]) else 0.95
 
         ax.plot(
             traj["PC1"].values,
             traj["PC2"].values,
             traj["PC3"].values,
             color=PALETTE[condition],
-            alpha=0.85,
-            linewidth=1.3,
+            alpha=alpha,
+            linewidth=1.5,
             linestyle=linestyle,
         )
 
@@ -369,18 +377,33 @@ def figure3_trajectories(data):
 
     selected = _select_episodes(data["episode_index"], per_condition=2)
 
-    fig = plt.figure(figsize=(12.5, 5.5), constrained_layout=True)
+    fig = plt.figure(figsize=(12.5, 6.0), constrained_layout=False)
+    fig.suptitle(
+        "Rightward successes and failed rightward perturbation trials",
+        fontsize=12,
+        y=0.97,
+    )
 
     ax1 = fig.add_subplot(1, 2, 1, projection="3d")
-    _plot_trajectory_set(ax1, data["policy_scores"], selected, "Policy trajectories")
+    _plot_trajectory_set(
+        ax1,
+        data["policy_scores"],
+        selected,
+        "Policy latent",
+    )
     _panel_label(ax1, "A")
 
     ax2 = fig.add_subplot(1, 2, 2, projection="3d")
-    _plot_trajectory_set(ax2, data["value_scores"], selected, "Value trajectories")
+    _plot_trajectory_set(
+        ax2,
+        data["value_scores"],
+        selected,
+        "Value latent",
+    )
     _panel_label(ax2, "B")
 
     legend_handles = []
-    for condition in CONDITIONS:
+    for condition in ["P0", "R1", "R2", "R3"]:
         legend_handles.append(
             plt.Line2D([0], [0], color=PALETTE[condition], lw=2, label=condition)
         )
@@ -391,16 +414,26 @@ def figure3_trajectories(data):
         ]
     )
 
-    fig.legend(handles=legend_handles, loc="upper center", ncol=9, frameon=False)
+    fig.legend(
+        handles=legend_handles,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 0.02),
+        ncol=6,
+        frameon=False,
+    )
 
-    png = OUT / "figure3_neural_trajectories.png"
-    pdf = OUT / "figure3_neural_trajectories.pdf"
+    fig.subplots_adjust(
+        top=0.86,
+        bottom=0.12,
+        left=0.03,
+        right=0.98,
+        wspace=0.08,
+    )
 
-    fig.savefig(png, bbox_inches="tight")
-    fig.savefig(pdf, bbox_inches="tight")
+    outputs = _export_figure(fig, "figure3_neural_trajectories")
     plt.close(fig)
 
-    return [png, pdf]
+    return outputs
 
 
 def _pc_long(df):
@@ -449,14 +482,10 @@ def figure4_success_failure(data):
     axes[0].legend(frameon=False, title="")
     axes[1].legend_.remove()
 
-    png = OUT / "figure4_success_failure.png"
-    pdf = OUT / "figure4_success_failure.pdf"
-
-    fig.savefig(png, bbox_inches="tight")
-    fig.savefig(pdf, bbox_inches="tight")
+    outputs = _export_figure(fig, "figure4_success_failure")
     plt.close(fig)
 
-    return [png, pdf]
+    return outputs
 
 
 def save_manifest(paths):

@@ -165,6 +165,10 @@ class PolicyEvaluator:
                 "reward": total_reward,
                 "success": success,
                 "collision": collision,
+                "desired_route": info["desired_route"],
+                "route_signal": info["route_signal"],
+                "start_x": info["start_x"],
+                "start_y": info["start_y"],
                 "steps": len(trajectory),
 
                 # Existing metrics

@@ -81,6 +81,10 @@ class PolicyEvaluatorV2:
         max_speed,
         heading_deviation,
         final_lateral_error,
+        route,
+        route_signal,
+        start_x,
+        start_y,
     ):
         """
         Save metadata describing one evaluation episode.
@@ -104,6 +108,10 @@ class PolicyEvaluatorV2:
             # --------------------------------------------------
             "episode": int(episode),
             "condition": str(condition),
+            "desired_route": str(route),
+            "route_signal": float(route_signal),
+            "start_x": float(start_x),
+            "start_y": float(start_y),
 
             # --------------------------------------------------
             # Outcome
@@ -409,6 +417,10 @@ class PolicyEvaluatorV2:
             summary.append({
                 "episode": episode,
                 "condition": condition,
+                "desired_route": info["desired_route"],
+                "route_signal": info["route_signal"],
+                "start_x": info["start_x"],
+                "start_y": info["start_y"],
                 "outcome": (
                     "success"
                     if success
@@ -534,6 +546,10 @@ class PolicyEvaluatorV2:
                 max_speed=summary[-1]["max_speed"],
                 heading_deviation=summary[-1]["max_heading_deviation"],
                 final_lateral_error=summary[-1]["final_lateral_error"],
+                route=info["desired_route"],
+                route_signal=info["route_signal"],
+                start_x=info["start_x"],
+                start_y=info["start_y"],
             )
 
         # ======================================================

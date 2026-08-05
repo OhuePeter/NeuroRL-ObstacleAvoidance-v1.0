@@ -14,6 +14,10 @@ Version:
 from dataclasses import dataclass
 
 
+def _clamp(value, lower, upper):
+    return max(lower, min(value, upper))
+
+
 @dataclass
 class RewardWeights:
 
@@ -46,6 +50,14 @@ class RewardFunction:
         collision,
         ax,
         ay,
+        agent_x=None,
+        agent_y=None,
+        corridor_mid_x=None,
+        corridor_mid_y_min=None,
+        corridor_mid_y_max=None,
+        desired_route_signal=0.0,
+        route_target_offset_x=0.0,
+        route_shaping_scale=0.0,
     ):
 
         reward = {}
@@ -93,6 +105,28 @@ class RewardFunction:
         )
 
         reward["time"] = self.weights.time
+
+        reward["route"] = 0.0
+
+        if (
+            desired_route_signal != 0.0
+            and agent_x is not None
+            and agent_y is not None
+            and corridor_mid_x is not None
+            and corridor_mid_y_min is not None
+            and corridor_mid_y_max is not None
+            and corridor_mid_y_min <= agent_y <= corridor_mid_y_max
+            and route_target_offset_x > 0.0
+            and route_shaping_scale > 0.0
+        ):
+            target_x = (
+                corridor_mid_x +
+                desired_route_signal * route_target_offset_x
+            )
+            normalized_error = abs(agent_x - target_x) / route_target_offset_x
+            reward["route"] = route_shaping_scale * (
+                1.0 - _clamp(normalized_error, 0.0, 1.0)
+            )
 
         reward["total"] = sum(
             reward.values()

@@ -164,6 +164,8 @@ def load_neural_dataset():
             summary = summary_df.loc[episode]
             success = bool(summary.get("success", False))
             collision = bool(summary.get("collision", False))
+            desired_route = summary.get("desired_route", "either")
+            route_signal = float(summary.get("route_signal", 0.0))
 
             start_index = total_timesteps
             end_index = total_timesteps + timesteps
@@ -180,6 +182,8 @@ def load_neural_dataset():
                     "success": success,
                     "failure": not success,
                     "collision": collision,
+                    "desired_route": desired_route,
+                    "route_signal": route_signal,
                 }
                 for t in range(timesteps)
             )
@@ -190,6 +194,8 @@ def load_neural_dataset():
                     "episode": int(episode),
                     "success": success,
                     "collision": collision,
+                    "desired_route": desired_route,
+                    "route_signal": route_signal,
                     "start_index": int(start_index),
                     "end_index": int(end_index),
                     "timesteps": int(timesteps),

@@ -27,7 +27,7 @@ from experiments.version_2_0.evaluation.config import (
 )
 
 MODEL = Path(
-    "experiments/version_1_0/checkpoints/ppo_baseline_P0.zip"
+    "experiments/version_1_0/checkpoints/ppo_final.zip"
 )
 
 CONDITIONS = [

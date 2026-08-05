@@ -71,11 +71,13 @@ class NeuroRLEnvironment(gym.Env):
         self.current_step = 0
 
         self.previous_goal_distance = None
+        self.route_signal = 0.0
+        self.route_waypoint_complete = True
 
         self.observation_space = spaces.Box(
             low=-np.inf,
             high=np.inf,
-            shape=(12,),
+            shape=(13,),
             dtype=np.float32
         )
 
@@ -90,7 +92,17 @@ class NeuroRLEnvironment(gym.Env):
 
         super().reset(seed=seed)
 
-        self.world.reset()
+        self.world.reset(
+            desired_route=options.get("desired_route")
+            if options is not None
+            else None
+        )
+
+        self.route_signal = {
+            "left": -1.0,
+            "right": 1.0,
+        }.get(self.world.desired_route, 0.0)
+        self.route_waypoint_complete = self.world.desired_route == "either"
         
         if self.biological_variability:
             x, y = self.variability.random_start(
@@ -110,7 +122,12 @@ class NeuroRLEnvironment(gym.Env):
             self.world.goal.position
         )
 
-        observation = self.observation_builder.build(self.world)
+        navigation_target = self._navigation_target()
+
+        observation = self.observation_builder.build(
+            self.world,
+            target_position=navigation_target
+        )
 
         if self.biological_variability:
             observation = self.variability.observation_noise(
@@ -122,6 +139,13 @@ class NeuroRLEnvironment(gym.Env):
             "goal_reached": False,
             "collision": False,
             "step": 0,
+            "desired_route": self.world.desired_route,
+            "route_signal": self.route_signal,
+            "start_x": self.world.agent.start_x,
+            "start_y": self.world.agent.start_y,
+            "target_x": navigation_target[0],
+            "target_y": navigation_target[1],
+            "waypoint_active": not self.route_waypoint_complete,
         }
 
         return observation, info
@@ -129,6 +153,7 @@ class NeuroRLEnvironment(gym.Env):
     def step(self, action):
 
         self.current_step += 1
+        previous_position = self.world.agent.position
 
         if self.biological_variability:
             action = self.variability.action_noise(action)
@@ -143,6 +168,24 @@ class NeuroRLEnvironment(gym.Env):
             action,
             self.dt,
             external_force=force
+        )
+
+        if not self.route_waypoint_complete:
+            self.route_waypoint_complete = self.world.waypoint_reached(
+                self.world.agent.x,
+                self.world.agent.y
+            )
+
+        navigation_target = self._navigation_target()
+
+        previous_navigation_distance = self.physics.distance(
+            previous_position,
+            navigation_target
+        )
+
+        current_navigation_distance = self.physics.distance(
+            self.world.agent.position,
+            navigation_target
         )
 
         current_goal_distance = self.physics.distance(
@@ -174,9 +217,9 @@ class NeuroRLEnvironment(gym.Env):
 
         reward = self.reward_function.compute_total_reward(
 
-            previous_goal_distance=self.previous_goal_distance,
+            previous_goal_distance=previous_navigation_distance,
 
-            current_goal_distance=current_goal_distance,
+            current_goal_distance=current_navigation_distance,
 
             minimum_obstacle_distance=minimum_obstacle_distance,
 
@@ -187,6 +230,32 @@ class NeuroRLEnvironment(gym.Env):
             ax=self.world.agent.ax,
 
             ay=self.world.agent.ay,
+
+            agent_x=self.world.agent.x,
+
+            agent_y=self.world.agent.y,
+
+            corridor_mid_x=self.world.midline_x,
+
+            corridor_mid_y_min=self.world.route_cfg.get(
+                "corridor_mid_y_min"
+            ),
+
+            corridor_mid_y_max=self.world.route_cfg.get(
+                "corridor_mid_y_max"
+            ),
+
+            desired_route_signal=self.route_signal,
+
+            route_target_offset_x=self.world.route_cfg.get(
+                "target_offset_x",
+                0.0
+            ),
+
+            route_shaping_scale=self.world.route_cfg.get(
+                "shaping_scale",
+                0.0
+            ),
         )
 
         self.logger.log(
@@ -217,13 +286,16 @@ class NeuroRLEnvironment(gym.Env):
 
             collision=collision,
 
-            route="Unknown"
+            route=self.world.desired_route
 
         )
 
-        self.previous_goal_distance = current_goal_distance
+        self.previous_goal_distance = current_navigation_distance
 
-        observation = self.observation_builder.build(self.world)
+        observation = self.observation_builder.build(
+            self.world,
+            target_position=navigation_target
+        )
 
         if self.biological_variability:
             observation = self.variability.observation_noise(
@@ -256,6 +328,20 @@ class NeuroRLEnvironment(gym.Env):
 
             "heading": self.world.agent.heading,
 
+            "desired_route": self.world.desired_route,
+
+            "route_signal": self.route_signal,
+
+            "start_x": self.world.agent.start_x,
+
+            "start_y": self.world.agent.start_y,
+
+            "target_x": navigation_target[0],
+
+            "target_y": navigation_target[1],
+
+            "waypoint_active": not self.route_waypoint_complete,
+
         }
 
         return (
@@ -271,3 +357,9 @@ class NeuroRLEnvironment(gym.Env):
 
     def close(self):
         pass
+
+    def _navigation_target(self):
+        if self.route_waypoint_complete:
+            return self.world.goal.position
+
+        return self.world.route_waypoint()

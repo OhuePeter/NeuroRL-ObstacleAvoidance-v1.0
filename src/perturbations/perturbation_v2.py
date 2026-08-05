@@ -52,7 +52,7 @@ class Perturbation:
             self.start_step = variability.perturbation_step()
 
         # Perturbation duration (simulation steps)
-        self.duration = 20
+        self.duration = 14
 
         # --------------------------------------------------
         # Stronger perturbation magnitudes
@@ -62,13 +62,13 @@ class Perturbation:
 
             "P0": (0.0, 0.0),
 
-            "L1": (-0.60, 0.0),
-            "L2": (-1.30, 0.0),
-            "L3": (-2.20, 0.0),
+            "L1": (-0.40, 0.0),
+            "L2": (-0.60, 0.0),
+            "L3": (-0.85, 0.0),
 
-            "R1": (0.60, 0.0),
-            "R2": (1.30, 0.0),
-            "R3": (2.20, 0.0),
+            "R1": (0.40, 0.0),
+            "R2": (0.65, 0.0),
+            "R3": (1.80, 0.0),
         }
 
     def get_force(self, current_step):
