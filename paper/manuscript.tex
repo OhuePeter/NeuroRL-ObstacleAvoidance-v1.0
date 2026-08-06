@@ -44,16 +44,18 @@ The PPO controller operates in closed loop with the point-mass environment throu
 \label{sec:behavioural_results}
 
 Behavioural performance varied systematically with perturbation magnitude and direction.
-Figure~\ref{fig:behavioural_trajectories} summarizes how average trajectories were deformed across leftward and rightward perturbation conditions, while Figure~\ref{fig:behavioural_performance} quantifies the resulting changes in reward, duration, path length, and final lateral error.
-Figure~\ref{fig:behavioural_adaptation} then summarizes robustness and compensatory adaptation using success rate, collision rate, peak lateral velocity, and heading deviation.
+Figure~\ref{fig:behavioural_trajectories} shows cumulative overlaid trajectories across all seven perturbation conditions, with per-condition success rates and the active perturbation zone marked.
+Figure~\ref{fig:behavioural_performance} quantifies the resulting changes in reward, duration, path length, and final lateral error across conditions.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.98\textwidth]{figures/figure2_behavioural_trajectories.pdf}
+\includegraphics[width=0.98\textwidth]{figures/figure2_cumulative_perturbation_trajectories.pdf}
 \caption{
-Behavioural trajectory structure across perturbation conditions.
-Mean trajectories are shown separately for leftward and rightward perturbations, together with representative successful and failed trials under the largest rightward perturbation.
-The panels show how perturbation magnitude reshapes reach geometry and increases failure risk in the most challenging condition.
+Adaptive route geometry under graded lateral perturbations.
+Cumulative overlaid trajectories are shown for all seven perturbation conditions (P0; L1--L3, leftward; R1--R3, rightward).
+Solid lines indicate successful episodes; dashed lines indicate failures.
+Success rates by condition: P0 100\%, L1 100\%, L2 100\%, L3 90\%, R1 100\%, R2 85\%, R3 50\%.
+The shaded band marks the perturbation-active zone; two static circular obstacles are shown in grey.
 }
 \label{fig:behavioural_trajectories}
 \end{figure*}
@@ -69,15 +71,7 @@ Together, these measures quantify the progressive behavioural cost associated wi
 \label{fig:behavioural_performance}
 \end{figure*}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.90\textwidth]{figures/figure4_behavioural_adaptation.pdf}
-\caption{
-Robustness and adaptation metrics across perturbation conditions.
-Success rate, collision rate, peak lateral velocity, and maximum heading deviation summarize how the learned controller compensates for external disturbances and where robustness begins to break down.
-}
-\label{fig:behavioural_adaptation}
-\end{figure*}
+% figure4_behavioural_adaptation demoted to figureS1 (supplementary).
 
 % ==========================================================
 % Neural + decision results (Experiment 2)
@@ -162,17 +156,17 @@ The policy uses multiple route families, and evaluation coverage across perturba
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.95\textwidth]{figures/figure8_hierarchical_latent_structure.pdf}
+\includegraphics[width=0.95\textwidth]{figures/figure8_nashed_replication.pdf}
 \caption{
-Hierarchical latent organization of perturbation conditions.
-(a) Dendrogram of condition centroids in latent space using Ward linkage.
-(b) Pairwise latent centroid-distance matrix.
+Nashed-style replication of perturbation-evoked trajectory geometry.
+Reach paths are plotted in the format of Nashed et al.\ to facilitate direct comparison with biological hand-path data under analogous lateral-force perturbations.
+Condition colour conventions match Figures~\ref{fig:behavioural_trajectories}--\ref{fig:route_perturbation_distribution}.
 }
-\label{fig:hierarchical_latent_structure}
+\label{fig:nashed_replication}
 \end{figure*}
 
-Figure~\ref{fig:hierarchical_latent_structure} provides a hierarchical view of representational similarity across perturbation conditions.
-This complements PCA and decoding by showing how condition centroids cluster at the population level.
+Figure~\ref{fig:nashed_replication} places the computational results in direct dialogue with the biological motor-control literature by replicating the Nashed et al.\ trajectory format.
+The close correspondence between perturbation-evoked path deflections in the model and those reported in human reaching experiments strengthens the claim that the learned controller develops feedback-correction strategies that parallel biological sensorimotor adaptation.
 
 \subsection{Claim-Safe Summary of the New Experiment}
 
