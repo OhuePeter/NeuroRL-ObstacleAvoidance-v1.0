@@ -47,13 +47,15 @@ def set_style():
     sns.set_theme(style="whitegrid", context="paper")
     plt.rcParams.update(
         {
-            "font.family": "serif",
-            "font.serif": ["Times New Roman", "DejaVu Serif"],
+            "svg.fonttype": "none",           # editable text in Inkscape
+            "font.family": "sans-serif",
+            "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
             "axes.titlesize": 11,
             "axes.labelsize": 9,
             "xtick.labelsize": 8,
             "ytick.labelsize": 8,
             "legend.fontsize": 8,
+            "axes.linewidth": 0.8,
             "savefig.dpi": 600,
             "figure.dpi": 300,
         }
@@ -64,7 +66,8 @@ def export_figure(fig, stem):
     outputs = []
     for ext in [".png", ".pdf", ".svg"]:
         out = FIG_OUT / f"{stem}{ext}"
-        fig.savefig(out, bbox_inches="tight")
+        fmt = ext.lstrip(".")
+        fig.savefig(out, format=fmt, bbox_inches="tight")
         outputs.append(out)
     plt.close(fig)
     return outputs
