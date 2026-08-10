@@ -65,7 +65,82 @@ The repository contains the full code, analysis pipeline, manuscript source, and
 
 ## Quick start
 
-### 1. Fork the repository
+### Install dependencies
+
+```bash
+git clone https://github.com/OhuePeter/NeuroRL-ObstacleAvoidance-v1.0.git
+cd NeuroRL-ObstacleAvoidance-v1.0
+
+# Option A — conda
+conda env create -f environment.yml
+conda activate neurorl
+
+# Option B — pip (Python 3.11 venv)
+pip install -r requirements.txt
+pip install -e .
+```
+
+### Run the full pipeline
+
+```bash
+# 1. Train the PPO controller
+python scripts/train.py
+
+# 2. Evaluate under all 7 perturbation conditions
+python -m scripts.evaluate_experiment2
+
+# 3. Generate all 6 manuscript figures
+python -m scripts.analysis.manuscript_neural_enhanced_figures
+python -m scripts.analysis.manuscript_extended_plots
+python scripts/plot_cumulative_trajectories.py
+
+# 4. Re-convert figures to trimmed PNG (for Overleaf)
+python paper/convert_figures.py
+
+# 5. Compile manuscript locally (requires tectonic)
+cd paper
+tectonic manuscript_v2.tex
+```
+
+### Regenerate QR code
+
+```bash
+python -c "
+import qrcode
+qr = qrcode.QRCode(version=2, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=12, border=4)
+qr.add_data('https://github.com/OhuePeter/NeuroRL-ObstacleAvoidance-v1.0')
+qr.make(fit=True)
+qr.make_image().save('presentation/qr_codes/github_repo_qr.png')
+"
+```
+
+---
+
+## Overleaf instructions
+
+1. On Overleaf, click **New Project → Upload Project**.
+2. Upload a zip containing:
+   - `paper/manuscript_v2.tex` (rename to `main.tex`)
+   - `paper/references.bib`
+   - `paper/fig1_schematic.png` through `paper/fig6_learning.png`
+3. Set the compiler to **pdfLaTeX** (Project Settings → Compiler).
+4. Click **Compile**. All six figures will render in their correct positions.
+5. To recompile after editing: click the green **Recompile** button.
+
+> **Note:** If you update a figure, re-run `paper/convert_figures.py` locally, then re-upload the corresponding `figN_*.png` to Overleaf.
+
+---
+
+## Grant proposal
+
+The Connected Minds Seed Grant proposal is at `paper/grant_proposal_connected_minds.tex`.
+
+**To edit in Word:**
+1. Compile `grant_proposal_connected_minds.tex` in Overleaf to PDF.
+2. Upload the PDF to [Adobe Acrobat PDF-to-Word](https://www.adobe.com/acrobat/online/pdf-to-word.html) or use Microsoft Word's built-in PDF import (`File → Open → select PDF`).
+3. Edit the resulting `.docx` to adjust budget figures, team names, and dates for each specific call.
+
+The proposal template is structured to cover: summary, background, objectives, methodology, team, outcomes, timeline, budget, ethics, and knowledge translation. Re-use sections directly for CIHR Project Grant, NSERC Discovery, or Brain Canada applications by adjusting the call-specific sections (page limits, review criteria, application portal fields).
 
 1. Open the GitHub repository page.
 2. Click Fork.

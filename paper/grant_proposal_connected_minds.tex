@@ -1,0 +1,427 @@
+% ============================================================
+% Connected Minds Seed Grant Proposal
+% (also suitable as a template for CIHR, NSERC, Brain Canada)
+%
+% Principal Investigator: Gunnar Blohm
+% Trainee / Co-Investigator: Peter Ohue
+% Institution: Queen's University, Centre for Neuroscience Studies
+%
+% TO EXPORT TO WORD: compile this .tex to PDF in Overleaf,
+% then use Adobe Acrobat or https://www.adobe.com/acrobat/online/
+% pdf-to-word.html to convert. Alternatively, open the .tex source
+% in Overleaf and use the "Download Source" zip, then paste sections
+% into Word manually.
+% ============================================================
+
+\documentclass[12pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{microtype}
+\usepackage[numbers]{natbib}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{8pt}
+\linespread{1.15}
+
+\titleformat{\section}{\large\bfseries}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+
+\title{\textbf{Proposal for Connected Minds Seed Grant}\\[6pt]
+\large\textbf{Neural Population Dynamics as a Bridge Between Computational
+Motor Control and Adaptive Stroke Rehabilitation}}
+
+\author{%
+  Peter Ohue\textsuperscript{1} \and Gunnar Blohm\textsuperscript{1,2}\\[4pt]
+  \small\textsuperscript{1}Centre for Neuroscience Studies, Queen's University,
+  Kingston, ON, Canada\\
+  \small\textsuperscript{2}Department of Biomedical and Molecular Sciences,
+  Queen's University, Kingston, ON, Canada\\[4pt]
+  \small Corresponding: \texttt{gunnar.blohm@queensu.ca}
+}
+\date{August 2026}
+
+\begin{document}
+
+\maketitle
+
+% ============================================================
+\section{Project Summary (250 words)}
+% ============================================================
+
+Motor recovery after stroke is among the most pressing unmet needs in
+rehabilitation medicine.
+Despite decades of research, fewer than half of stroke survivors recover
+functional arm use, and existing therapies lack the mechanistic precision
+needed to tailor training to the individual patient.
+A central obstacle is that our ability to measure \emph{why} motor
+adaptation succeeds or fails in a given session remains limited: conventional
+clinical assessments capture task outcomes but not the internal neural
+representations that determine whether a correction will be learned and
+retained.
+
+This proposal builds directly on our recent computational work demonstrating
+that a reinforcement learning (RL) controller trained on adaptive
+obstacle-avoidance develops structured, low-dimensional neural population
+representations that encode perturbation context in a linearly accessible
+form -- properties strikingly similar to those documented in biological
+motor cortex during reaching.
+We propose to extend this framework in two synergistic directions.
+
+\textbf{Aim 1.} Characterise how neural population dynamics in the RL policy
+network predict behavioural success and failure across perturbation
+conditions, and test whether the representational geometry generalises to
+novel tasks.
+
+\textbf{Aim 2.} Translate the analytical pipeline into a closed-loop
+virtual reality and wearable-sensor platform for upper-limb stroke
+rehabilitation, using the RL agent's latent representations as real-time
+biomarkers to personalise training difficulty and provide quantitative
+outcome measures beyond conventional clinical scales.
+
+The project directly advances the Connected Minds priority of
+human-centred AI for health, generating tools and insights applicable to
+any motor disorder in which adaptation under uncertainty is impaired.
+
+% ============================================================
+\section{Background and Rationale}
+% ============================================================
+
+\subsection{The Clinical Problem}
+
+Stroke is a leading cause of persistent adult disability in Canada, with
+approximately 62,000 new strokes occurring each year and upper-limb
+motor impairment affecting the majority of survivors~\cite{HeartStroke2023}.
+Recovery is highly heterogeneous: some patients regain near-normal function
+while others plateau at severe impairment, and current clinical tools cannot
+reliably predict which trajectory a given patient will follow
+~\cite{Kwakkel2019}.
+High-dose, task-oriented practice is the most evidence-supported
+rehabilitation strategy~\cite{French2016}, but translating this principle
+into individualized, adaptive protocols -- ones that automatically adjust
+challenge level to the patient's changing capacity -- remains an open
+engineering and scientific problem.
+
+\subsection{The Scientific Gap}
+
+The neural mechanisms underlying motor re-learning after stroke are poorly
+understood at the population level.
+Research in healthy adults has established that motor cortex activity during
+reaching organises onto low-dimensional neural manifolds whose geometry
+changes systematically with learning~\cite{Churchland2012,Sadtler2014,Oby2019}.
+However, it is unknown whether similar manifold reorganisation occurs during
+stroke recovery, whether the rate of that reorganisation predicts clinical
+outcomes, or how external perturbation schedules should be designed to
+accelerate it.
+
+Our recent RL-based work provides a computational bridge.
+We showed that a PPO controller trained purely by reward on an
+obstacle-avoidance task spontaneously develops hidden-layer representations
+with the same organisational properties -- low dimensionality, phase-aligned
+clustering, graded kinematic encoding, linear decodability -- observed in
+biological motor cortex~\cite{Ohue2026}.
+Critically, the latent states of successfully correcting trials are
+geometrically distinct from those of failure trials, suggesting that
+population geometry is a principled indicator of adaptive capacity.
+Translating this observation into a clinical tool requires: (i) extending
+the RL framework to richer, human-relevant environments; and (ii) acquiring
+a corresponding dataset from human stroke survivors performing analogous
+reaching tasks.
+
+\subsection{Connected Minds Alignment}
+
+This proposal aligns with Connected Minds' focus on digital technologies
+that augment human cognitive and physical capability.
+The planned closed-loop VR-RL platform is an instance of human-centred AI:
+the RL agent models the patient's evolving motor policy in real time, and
+its latent representations drive an adaptive training protocol that is
+responsive to the individual's neural and kinematic state rather than
+following a fixed schedule.
+The project also advances equity of access by targeting a platform that
+is deployable in home settings, reducing dependence on specialized
+rehabilitation centres.
+
+% ============================================================
+\section{Research Objectives and Hypotheses}
+% ============================================================
+
+\textbf{Overall objective:}
+To establish low-dimensional latent neural population dynamics, derived
+from both computational RL models and from kinematic/EMG surrogates in
+human participants, as quantitative biomarkers of adaptive motor learning
+and as drivers of individualized rehabilitation protocols.
+
+\textbf{Hypothesis 1.}
+The representational geometry of a trained RL policy's hidden-layer activity
+will generalise across task variants: the same low-dimensional manifold
+structure and phase-aligned clustering identified in the obstacle-avoidance
+task will emerge in a richer perturbation environment with time-varying
+force fields and dynamic obstacles.
+
+\textbf{Hypothesis 2.}
+In stroke survivors, the rate of manifold reorganisation during a
+standardised perturbation-based reaching protocol -- quantified by the
+change in population variance explained by the first two PCs across
+sessions -- will correlate significantly with gains on the Fugl-Meyer
+Upper Extremity (FMA-UE) scale at six-week follow-up.
+
+\textbf{Hypothesis 3.}
+A closed-loop training protocol in which task difficulty is modulated by
+the RL agent's latent state geometry (specifically, by the Euclidean
+distance of the current trial's latent trajectory from the learned
+``success manifold'') will produce larger FMA-UE gains over six weeks than
+a matched fixed-difficulty protocol, in a randomised single-site pilot trial.
+
+% ============================================================
+\section{Methodology}
+% ============================================================
+
+\subsection{Phase 1: Extended Computational Framework (Months 1--8)}
+
+\textbf{Environment extension.}
+We will extend the current two-dimensional point-mass environment to
+include: (i) a three-degree-of-freedom planar arm with muscle-like
+actuation and joint limits; (ii) time-varying force fields whose magnitude
+and direction are drawn from the same distribution as the clinical
+perturbation protocol; and (iii) dynamic obstacles that require online
+re-planning.
+The RL controller will be trained using PPO with the same hyperparameter
+schedule validated in the baseline study, and the neural population
+analysis pipeline (PCA, $K$-means clustering, linear decoding) will be
+applied to the hidden-layer activity of the converged policy.
+
+\textbf{Multi-seed validation.}
+A minimum of ten independent training runs will be conducted to characterise
+the variability in representational structure across seeds.
+Features that are stable across seeds (low coefficient of variation) will
+be designated as candidate biomarkers for translation to the clinical phase.
+
+\textbf{Recurrent architecture comparison.}
+A long short-term memory (LSTM) variant of the policy network will be
+trained under identical conditions.
+Comparing the manifold geometry between feedforward MLP and LSTM policies
+will reveal whether temporal memory substantially changes the
+representational organisation, informing the choice of architecture for
+the closed-loop platform.
+
+\subsection{Phase 2: Human Participant Study (Months 6--18)}
+
+\textbf{Participants.}
+We will recruit $n=20$ healthy adults and $n=30$ chronic stroke survivors
+(FMA-UE 20--55, $\geq$6 months post-stroke, sufficient cognitive function
+for VR interaction).
+The sample size for the stroke group is powered to detect a correlation
+of $r \geq 0.50$ between manifold reorganisation rate and FMA-UE change
+($\alpha = 0.05$, $1-\beta = 0.80$, two-tailed).
+
+\textbf{Instrumentation.}
+Participants will perform a standardised perturbation-based reaching task
+in a custom VR environment rendered on a head-mounted display (Meta Quest
+Pro or equivalent).
+Reaching kinematics will be captured at 100\,Hz using wrist-worn IMUs
+(XSENS DOT) and processed to extract the same eight-dimensional state
+vector used in the RL environment (goal-relative position, obstacle-relative
+position, velocity).
+Surface EMG will be recorded from six upper-limb muscles to provide a
+neural surrogate for population analysis.
+
+\textbf{Perturbation protocol.}
+Seven perturbation conditions mirroring the computational study (P0, L1--L3,
+R1--R3) will be applied via a lightweight cable-driven exoskeleton
+(hand-exo or equivalent) or through VR-mediated haptic redirection.
+Three sessions per week for six weeks will be administered, with each
+session comprising 100 reaching trials.
+
+\textbf{Population analysis.}
+PCA and linear decoding will be applied to the EMG/kinematic population
+vector at each timestep, paralleling the RL analysis pipeline.
+The primary outcome for Hypothesis~2 is the session-by-session change in
+$\%$ variance explained by PC1+PC2 of the EMG population, correlated
+with FMA-UE change scores.
+
+\subsection{Phase 3: Closed-Loop Pilot Trial (Months 14--24)}
+
+\textbf{Adaptive protocol design.}
+The difficulty-adaptation rule will use the latent state geometry from the
+RL model as a reference manifold.
+On each trial, the deviation of the participant's kinematic state trajectory
+from the RL ``success manifold'' (projected into the common PCA space) will
+be computed online.
+If the deviation exceeds a threshold calibrated from the Phase 2 data, the
+perturbation magnitude will be reduced by one step; if it falls below a
+second threshold, the perturbation magnitude will be increased.
+This rule mimics the bandwidth feedback used in motor learning research and
+is consistent with the principles of optimal challenge point theory.
+
+\textbf{Randomised pilot.}
+$n=20$ stroke survivors will be randomised (1:1) to adaptive vs.
+fixed-difficulty six-week protocols.
+Primary outcome: FMA-UE change at six weeks.
+Secondary outcomes: kinematic smoothness (SPARC), manifold reorganisation
+rate, number of sessions required to reach each perturbation level,
+patient-reported experience (NASA-TLX).
+
+\textbf{Statistical analysis.}
+The primary analysis is a mixed-model repeated-measures ANOVA with
+group and session as factors.
+Effect sizes (Cohen's $d$) will be reported with 95\% confidence intervals.
+This is a feasibility and signal-detection trial; results will be used to
+power a future definitive RCT.
+
+% ============================================================
+\section{Team and Expertise}
+% ============================================================
+
+\textbf{Gunnar Blohm (PI)} is a Professor and Canada Research Chair at
+the Centre for Neuroscience Studies, Queen's University, with expertise
+in computational motor neuroscience, sensorimotor transformations, and
+neural population modelling.
+His laboratory has a track record of developing and validating population-
+level analyses of motor cortex and brainstem circuits.
+
+\textbf{Peter Ohue (Graduate Trainee / Co-I)} is a doctoral candidate in the
+Blohm laboratory with expertise in reinforcement learning, neural population
+analysis, and computational neuroscience.
+He is the primary developer of the RL-based obstacle-avoidance framework
+on which this proposal is based, and will lead the computational and
+experimental phases.
+
+\textbf{Collaborators (to be confirmed):}
+A rehabilitation medicine specialist and a certified occupational therapist
+will provide clinical expertise for the stroke participant protocol and
+outcome assessment.
+A biomedical engineer with wearable-sensor expertise will support the IMU
+and EMG data acquisition pipeline.
+
+% ============================================================
+\section{Expected Outcomes and Impact}
+% ============================================================
+
+\begin{enumerate}[leftmargin=*, label=\arabic*.]
+  \item An extended RL framework with validated multi-seed representational
+        stability, providing a robust computational foundation for clinical
+        translation.
+  \item A normative dataset of kinematic manifold dynamics in healthy adults
+        and stroke survivors during standardised perturbation-based reaching,
+        establishing reference values for the proposed biomarkers.
+  \item Proof-of-concept evidence for the validity of RL latent geometry as
+        a predictor of clinical rehabilitation outcomes.
+  \item A pilot RCT comparing adaptive vs.\ fixed-difficulty VR-RL
+        rehabilitation, with effect size estimates to power a future
+        definitive trial.
+  \item Open-source code and data deposited on Zenodo and GitHub, enabling
+        independent replication and extension.
+\end{enumerate}
+
+The broader impact extends beyond stroke: the framework is applicable to
+any motor disorder in which adaptation under perturbation is impaired,
+including Parkinson's disease, cerebellar ataxia, and spinal cord injury.
+The home-deployable VR-wearable platform addresses the access gap between
+specialised rehabilitation centres and community care, directly advancing
+Connected Minds' mandate of equitable, technology-enabled human
+flourishing.
+
+% ============================================================
+\section{Timeline}
+% ============================================================
+
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Period} & \textbf{Milestones} \\
+\midrule
+Months 1--4   & Environment extension (3-DOF arm, force fields, dynamic obstacles); multi-seed training; LSTM comparison \\
+Months 3--6   & Ethics approval (human study); wearable instrumentation setup; pilot feasibility in healthy adults ($n=5$) \\
+Months 6--12  & Healthy adult dataset ($n=20$); manifold analysis pipeline validation against RL reference \\
+Months 10--18 & Stroke survivor observational study ($n=30$); Hypothesis~2 analysis \\
+Months 14--24 & Adaptive-protocol pilot RCT ($n=20$ stroke survivors); Hypothesis~3 analysis \\
+Months 22--24 & Manuscript preparation; data deposition; dissemination at FENS, SFN, and Canadian neuroscience meetings \\
+\bottomrule
+\end{tabularx}
+
+% ============================================================
+\section{Budget Justification}
+% ============================================================
+
+\textit{Note: Amounts are indicative for a Connected Minds Seed Grant
+(typically \$50{,}000--\$100{,}000 over 1--2 years).
+Adjust to the specific call ceiling and duration.}
+
+\begin{tabularx}{\linewidth}{@{}lrX@{}}
+\toprule
+\textbf{Category} & \textbf{Amount (CAD)} & \textbf{Justification} \\
+\midrule
+Graduate student stipend (1 FTE, 24 months) & \$60{,}000 & Peter Ohue (doctoral trainee); standard Queen's University stipend (\$30{,}000/year) \\
+Research assistant (part-time, 12 months)   & \$18{,}000 & Experimental support for human participant sessions \\
+Wearable sensors (XSENS DOT $\times$4)      & \$8{,}000  & Kinematic capture for human participant protocol \\
+VR hardware (Meta Quest Pro or equivalent)  & \$4{,}000  & Head-mounted display for VR reaching task \\
+EMG system (Delsys Trigno $\times$6 ch.)    & \$6{,}000  & Neuromuscular signal acquisition \\
+Computing (cloud GPU credits)               & \$3{,}000  & Multi-seed RL training; real-time latent state computation \\
+Participant compensation (\$20/h, 50 h total) & \$4{,}000 & Healthy adults and stroke survivors \\
+Open-access publication fees (2 papers)     & \$6{,}000  & PLOS Computational Biology or equivalent \\
+Conference travel (2 conferences)           & \$4{,}000  & SFN, Canadian Association for Neuroscience \\
+Indirect costs (20\%)                       & \$22{,}600 & University overhead rate \\
+\midrule
+\textbf{Total}                              & \textbf{\$135{,}600} & \\
+\bottomrule
+\end{tabularx}
+
+\textit{For a \$50{,}000 ceiling: reduce to 12 months, one conference,
+no EMG system; request the EMG as in-kind from the rehabilitation
+collaborator.}
+
+% ============================================================
+\section{Data Management and Open Science}
+% ============================================================
+
+All experimental data will be de-identified and deposited on the Queen's
+University institutional repository (QSPACE) and on Zenodo with a
+persistent DOI within six months of collection.
+Analysis code and trained RL models will be maintained on GitHub
+(already public: \texttt{github.com/OhuePeter/NeuroRL-ObstacleAvoidance-v1.0})
+under the MIT licence.
+Manuscripts will be submitted to open-access journals or posted as
+preprints on bioRxiv concurrent with journal submission.
+
+% ============================================================
+\section{Ethics and Risk}
+% ============================================================
+
+Human participant research will be conducted under Queen's University
+Health Sciences and Affiliated Teaching Hospitals Research Ethics Board
+(HSREB) approval, which will be sought in Months 3--5.
+The perturbation protocol uses brief, low-force lateral impulses comparable
+in magnitude to those used routinely in motor learning research and poses
+negligible physical risk.
+VR exposure will be limited to 30-minute sessions to minimise cybersickness.
+Stroke participants will be screened to exclude severe spasticity, uncontrolled
+epilepsy, and visual impairments.
+
+% ============================================================
+\section{Knowledge Translation}
+% ============================================================
+
+Short-term (\textless 2 years): peer-reviewed publications in computational
+neuroscience and rehabilitation journals; open-source code and data release;
+conference presentations.
+
+Medium-term (2--5 years): submission of a full-scale CIHR Project Grant or
+NSERC Discovery Grant building on the Seed results; regulatory-pathway
+consultation for clinical device classification of the closed-loop platform.
+
+Long-term ($>$5 years): commercialisation pathway in partnership with
+Queen's Partnerships and Innovation (QPI) for a CE/FDA-clear home
+rehabilitation device; integration with publicly funded rehabilitation
+programmes in Ontario.
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}
