@@ -105,7 +105,7 @@ It emerges from coordinated activity across distributed populations in
 motor cortex and cerebellum, populations whose collective dynamics
 constitute a low-dimensional trajectory through a high-dimensional
 activity space
-\citep{Churchland2012,Shenoy2013,Gallego2017,Crevecoeur2019,Blohm2009}.
+\citep{Churchland2012,Shenoy2013,Gallego2017,Crevecoeur2019,Blohm2009,Georgopoulos1986,Kalaska1989}.
 Understanding how this population-level organisation gives rise to robust,
 adaptive behaviour is a central goal of systems motor neuroscience.
 
@@ -119,7 +119,7 @@ internal parameters accordingly
 This reward-driven learning is, in spirit, analogous to biological motor
 skill acquisition: practice generates sensory and outcome feedback, and the
 nervous system gradually refines its internal representation to maximise
-successful performance \citep{Oby2019,Mathis2024}.
+successful performance \citep{Oby2019,Mathis2024,Shadmehr1994,WolpertGhahramani2000,Krakauer2019}.
 The comparison is not merely metaphorical; both processes involve an agent
 updating a policy based on signals about the quality of recent actions,
 without being told what the correct movement should have been.
@@ -134,7 +134,7 @@ probability ratio to the interval $[1-\epsilon, 1+\epsilon]$.
 This constraint formalises a principle well-established in motor learning
 research: incremental, bounded refinement of the control policy is more
 stable than wholesale revision, because large parameter changes risk
-degrading performance that has already been acquired \citep{Oby2019,SuttonBarto2018}.
+degrading performance that has already been acquired \citep{Oby2019,SuttonBarto2018,Heald2021,Krakauer2019}.
 The term ``proximal'' refers precisely to this neighbourhood constraint:
 updates stay close to the current policy, producing steady improvement
 without the catastrophic performance swings that unconstrained gradient
@@ -155,11 +155,11 @@ Population activity in motor cortex during reaching evolves along smooth,
 low-dimensional neural manifolds, defined as compact subspaces within the
 high-dimensional activity space that capture the essential structure of
 movement generation
-\citep{Churchland2012,Shenoy2013,Cunningham2014,Gallego2017}.
+\citep{Churchland2012,Shenoy2013,Cunningham2014,Gallego2017,Sadtler2014,Elsayed2016,Kaufman2014}.
 Individual neurons within these populations exhibit heterogeneous tuning
 to kinematic variables, but the population as a whole encodes these
 variables in a structured, often linearly readable form
-\citep{Oby2019,Blohm2009,Murdison2015}.
+\citep{Oby2019,Blohm2009,Murdison2015,Georgopoulos1986,Perich2018}.
 These observations motivate the central question of this study: does an
 artificially trained controller that was never designed to resemble a
 biological motor system develop similar representational organisation as a
@@ -212,7 +212,7 @@ to learning rather than to the complexity of the physical system.
 This minimalism also makes the setup directly comparable to the planar
 arm-perturbation paradigms used in human motor neuroscience, where the
 task geometry rather than the limb dynamics is the primary independent
-variable \citep{Nashed2014,Pruszynski2012}.
+variable \citep{Nashed2014,Pruszynski2012,Shadmehr1994,Franklin2011}.
 
 Figure~\ref{fig:schematic} illustrates the task and analysis pipeline.
 Panel~A uses a planar arm and brain schematic to connect the setup to the
@@ -220,7 +220,7 @@ biological literature; all experiments use the point-mass dynamics
 summarized in Panel~C.
 Panel~B shows the PPO actor--critic loop that governs learning.
 
-\begin{figure}[htb]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.88\linewidth]{fig1_schematic.png}
   \caption{\textbf{Task design, control architecture, and population
@@ -327,7 +327,7 @@ The six-timestep impulse window is brief relative to the typical episode
 duration (approximately 100--120 timesteps), mimicking the short-duration
 mechanical perturbations applied in biological reaching paradigms to
 isolate online feedback responses from anticipatory motor planning
-\citep{Pruszynski2012,Nashed2014,Dimitriou2013,Todorov2002}.
+\citep{Pruszynski2012,Nashed2014,Dimitriou2013,Todorov2002,Shadmehr1994}.
 
 \subsection{Reinforcement Learning Controller and Training}
 
@@ -442,7 +442,7 @@ in the direction of the applied force: leftward conditions (L1--L3) bowed
 the path toward the left obstacle; rightward conditions (R1--R3) bowed it
 toward the right.
 
-\begin{figure}[htb]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.58\linewidth]{fig2_trajectories.png}
   \caption{\textbf{Cumulative reach trajectories across all seven
@@ -485,7 +485,7 @@ not through modulation of movement tempo.
 Figure~\ref{fig:velocity} characterises the temporal evolution of
 lateral velocity and total speed across all seven conditions.
 
-\begin{figure}[htb]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.80\linewidth]{fig3_velocity.png}
   \caption{\textbf{Velocity profiles reveal proportional perturbation
@@ -541,7 +541,7 @@ Figure~\ref{fig:pca} shows the result of projecting the full 256-dimensional
 hidden-layer activity onto its first two principal components across all
 evaluation timesteps.
 
-\begin{figure}[htb]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.88\linewidth]{fig4_pca.png}
   \caption{\textbf{Hidden-layer activity occupies a compact low-dimensional
@@ -585,7 +585,7 @@ just two dimensions.
 This is a striking degree of compression, comparable in magnitude to
 the low-dimensional manifold structure reported for motor cortex activity
 during reaching in both non-human primates and humans
-\citep{Churchland2012,Shenoy2013,Cunningham2014,Gallego2017}.
+\citep{Churchland2012,Shenoy2013,Cunningham2014,Gallego2017,Sadtler2014,Elsayed2016}.
 In both biological and artificial cases, the compression is not imposed
 externally; it emerges from the structure of the learning problem itself.
 When a system must produce a sequence of smooth, goal-directed movements,
@@ -604,7 +604,7 @@ acting.
 This phase-aligned clustering parallels findings from motor cortex
 recordings in biological reaching, where distinct neural population states
 have been identified for the preparatory, movement initiation, and
-movement completion epochs \citep{Churchland2012,Shenoy2013}.
+movement completion epochs \citep{Churchland2012,Shenoy2013,Kaufman2014,Perich2018}.
 We note that the choice of $K=4$ was not cross-validated; future work
 with held-out datasets and multiple training seeds would be needed to
 establish whether the four-cluster solution is a stable feature of the
@@ -614,7 +614,7 @@ Figure~\ref{fig:decoding} shows the confusion matrix from a linear
 classifier trained on single-timestep hidden-layer activity to identify
 the perturbation condition active on each trial.
 
-\begin{figure}[htb]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.56\linewidth]{fig5_decoding.png}
   \caption{\textbf{Linear decoding reveals that extreme perturbation
@@ -667,12 +667,12 @@ linear projection of the 256-dimensional activity vector.
 This mirrors the finding from biological motor neuroscience that
 target direction, perturbation magnitude, and trial outcome can all be
 decoded with linear classifiers trained on motor cortex population activity
-\citep{Churchland2012,Nashed2014,Oby2019}.
+\citep{Churchland2012,Nashed2014,Oby2019,Georgopoulos1986,Sadtler2014}.
 
 Figure~\ref{fig:learning} contextualises the representational findings
 within the training dynamics of the controller.
 
-\begin{figure}[htb]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{fig6_learning.png}
   \caption{\textbf{The controller converges stably, validating the
@@ -743,7 +743,7 @@ corrections in human reaching.
 In biological reaching, the primary motor cortex and premotor areas
 generate rapid, graded corrective responses to unexpected force perturbations
 that reshape the movement path without systematically altering movement
-speed \citep{Pruszynski2012,Nashed2014,FlashHogan1985,Scott2004,Dimitriou2013}.
+speed \citep{Pruszynski2012,Nashed2014,FlashHogan1985,Scott2004,Dimitriou2013,Shadmehr1994,Diedrichsen2010}.
 The PPO controller exhibits precisely this dissociation: it modulates
 path geometry in proportion to the applied force while keeping the overall
 movement tempo constant across all seven conditions (Figure~\ref{fig:velocity}B).
@@ -758,7 +758,7 @@ Nevertheless, the convergence of the kinematic signature of proportional
 lateral deflection with preserved speed is consistent with the computational
 principles of optimal feedback control (OFC), which predicts that
 well-adapted controllers should correct task-relevant errors while
-leaving task-irrelevant variables unchanged \citep{Todorov2002,Todorov2009}.
+leaving task-irrelevant variables unchanged \citep{Todorov2002,Todorov2009,Franklin2011,WolpertGhahramani2000}.
 Under OFC, speed is a task-irrelevant variable when a lateral perturbation
 is applied; correcting it would waste motor resources without improving
 goal attainment.
@@ -808,7 +808,7 @@ and correction epoch, the passage around the obstacles, and the final
 approach to goal.
 This phase-aligned clustering is consistent with the sequential activation
 of distinct neural population states documented in motor cortex during
-biological reaching \citep{Churchland2012,Shenoy2013}.
+biological reaching \citep{Churchland2012,Shenoy2013,Kaufman2014,Elsayed2016,Georgopoulos1986}.
 We again note that the choice of $K=4$ was not cross-validated; the number
 of clusters and their boundaries could shift across training seeds or
 evaluation datasets.
@@ -838,7 +838,7 @@ neuroscience.
 Studies of motor cortex activity during online reaching corrections show
 that the decodability of perturbation magnitude improves substantially
 when the decoder is given a temporal window of population activity rather
-than a single snapshot \citep{Nashed2014,Churchland2012}.
+than a single snapshot \citep{Nashed2014,Churchland2012,Sadtler2014,Perich2018}.
 The same principle likely applies here: the latent state at any single
 timestep is not a sufficient summary of the perturbation history, but the
 sequence of latent states over the correction epoch likely is.
@@ -898,7 +898,7 @@ context, are not unique features of biological neural circuits.
 They can emerge spontaneously in artificial controllers trained by
 reinforcement learning, without any architectural constraints or
 biological supervision
-\citep{Churchland2012,Gallego2017,Oby2019,Crevecoeur2019}.
+\citep{Churchland2012,Gallego2017,Oby2019,Crevecoeur2019,Silver2016,Haarnoja2018,Mnih2015DQN}.
 This convergence has implications in both directions.
 
 For motor neuroscientists, it suggests that the low-dimensional, phase-structured
@@ -906,7 +906,7 @@ representations observed in motor cortex may be a computationally preferred
 solution to the general problem of generating smooth, goal-directed
 movements under uncertainty, a solution that emerges from optimisation
 pressure rather than from the specific biophysical properties of cortical
-circuits.
+circuits \citep{Franklin2011,WolpertGhahramani2000,Rizzolatti2001,Berniker2011}.
 This raises the possibility of using well-characterised RL controllers
 as computational models for generating testable predictions about
 population dynamics in motor cortex, particularly under novel perturbation
