@@ -1,38 +1,66 @@
 # NeuroRL-ObstacleAvoidance-v1.0
 
-Computational neuroscience and reinforcement learning framework for studying behavioural adaptation and latent neural population dynamics during perturbed obstacle-avoidance reaching.
+**Neural Population Dynamics Reveal Internal Representations Underlying Adaptive Obstacle Avoidance in Reinforcement Learning**
+
+*Peter Ohue, Emily Oby, Gunnar Blohm — Centre for Neuroscience Studies, Queen's University*
+
+A computational neuroscience framework that trains a reinforcement learning controller on a reaching-inspired obstacle-avoidance task, probes it with graded lateral force perturbations, and analyses the hidden-layer activity as a neural population signal using the same dimensionality reduction, trajectory analysis, and linear decoding tools applied to biological motor cortex recordings.
+
+---
+
+## Download
+
+| Asset | Link |
+|-------|------|
+| **Manuscript PDF** | [`paper/manuscript_revised.pdf`](paper/manuscript_revised.pdf) |
+| Fig 1 — Task schematic | [`paper/figures/fig1_schematic.svg`](paper/figures/fig1_schematic.svg) |
+| Fig 2 — Trajectory overlay | [`paper/figures/fig2_trajectories.svg`](paper/figures/fig2_trajectories.svg) |
+| Fig 3 — Velocity profiles | [`paper/figures/fig3_velocity.svg`](paper/figures/fig3_velocity.svg) |
+| Fig 4 — PCA manifold & clustering | [`paper/figures/fig4_pca.svg`](paper/figures/fig4_pca.svg) |
+| Fig 5 — Decoder confusion matrix | [`paper/figures/fig5_decoding.svg`](paper/figures/fig5_decoding.svg) |
+| Fig 6 — Learning stability | [`paper/figures/fig6_learning.svg`](paper/figures/fig6_learning.svg) |
+
+---
+
+## Key findings
+
+- A PPO controller trained purely for task reward spontaneously develops **compact low-dimensional hidden-layer representations** (\~75 % of variance in 2 principal components), consistent with neural manifold structure in motor cortex.
+- Adaptation to lateral perturbations is expressed through **path-level corrections that preserve movement speed**, mirroring the kinematic signature of online feedback corrections in human reaching.
+- A **direction-dependent asymmetry** in robustness emerges from the geometry of the learned trajectory: rightward disturbances are more disruptive than leftward ones of equal magnitude.
+- **Extreme perturbation conditions produce linearly separable latent states**; mild conditions remain geometrically indistinct — a pattern mirroring difficulty-dependent decodability in biological motor cortex.
+
+---
 
 ## Quick links
 
-- Fork + reproduce guide: `docs/fork_and_reproduce.md`
-- Reproducibility details: `docs/reproducibility_guide.md`
-- Figure catalog with explanations: `docs/figure_catalog.md`
-- Citation instructions: `docs/citation_guide.md`
-- Zenodo and journal checklist: `docs/zenodo_release_checklist.md`
+- Reproducibility guide: `docs/reproducibility_guide.md`
+- Fork and contribute: `docs/fork_guide.md`
+- Citation: `docs/citation_guide.md`
+- Zenodo checklist: `docs/zenodo_release_checklist.md`
 
 ## Why this repository exists
 
-This project asks a focused scientific question:
-
-Can a policy trained without perturbations show adaptation-like neural population structure when perturbations are introduced only at evaluation time?
-
-The repository contains code, analysis, and manuscript assets needed to reproduce the main results for journal submission and Zenodo archiving.
+This project bridges computational motor neuroscience and reinforcement learning interpretability.
+We ask: does reward-driven optimisation produce internal representations with the same organisational features observed in biological motor populations?
+The repository contains the full code, analysis pipeline, manuscript source, and publication figures needed to reproduce and extend these results.
 
 ## What is included
 
-- Training and evaluation pipelines for PPO-based reaching control.
-- Behavioural and neural analysis pipelines.
-- Publication-ready figure and table generation scripts.
-- Manuscript source and supporting paper assets.
+- PPO training and evaluation pipeline (Stable-Baselines3, Gymnasium).
+- Behavioural analysis: trajectory geometry, kinematic metrics, perturbation statistics.
+- Neural population analysis: PCA, tuning, linear decoding of hidden-layer activity.
+- Six publication-quality SVG figures (Inkscape-ready, editable text).
+- Complete LaTeX manuscript source with bibliography.
+- Compiled PDF ready for submission.
 
 ## Repository structure
 
-- `src/`: package code (environment, training, evaluation, perturbation logic, analysis utilities).
-- `scripts/`: executable entry points for training, evaluation, and figure/table generation.
-- `configs/`: environment, training, evaluation, and perturbation configuration files.
-- `experiments/`: experiment outputs, checkpoints, logs, and derived analysis files.
-- `paper/`: manuscript source, manuscript figures, and manuscript tables.
-- `docs/`: reproducibility and project documentation.
+- `src/`: environment, training, evaluation, perturbation, and analysis utilities.
+- `scripts/`: entry points for training, evaluation, and figure generation.
+- `configs/`: environment, training, evaluation, and perturbation configurations.
+- `experiments/`: outputs, checkpoints, logs, and derived analysis files.
+- `paper/`: manuscript (`.tex`, `.pdf`), figures (SVG + PNG), and bibliography.
+- `docs/`: project and reproducibility documentation.
 - `tests/`: automated tests for core components.
 
 ## Quick start
