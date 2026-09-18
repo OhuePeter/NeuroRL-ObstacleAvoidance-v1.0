@@ -33,3 +33,5 @@ h5py
 jupyter
 
 qrcode
+
+python-docx
