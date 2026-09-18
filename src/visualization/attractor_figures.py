@@ -407,7 +407,7 @@ class AttractorFigures:
 
     def _save(self, fig, name):
 
-        for ext in ("png", "pdf"):
+        for ext in ("png", "pdf", "svg"):
 
             fig.savefig(
                 self.output_dir / f"{name}.{ext}",

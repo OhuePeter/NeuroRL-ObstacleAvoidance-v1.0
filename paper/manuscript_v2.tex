@@ -713,6 +713,92 @@ and is consistent with the training dynamics reported for similar
 obstacle-avoidance and reaching tasks in the RL literature
 \citep{Raffin2021StableBaselines3,Schulman2017}.
 
+The clustering and decoding results in Figures~\ref{fig:pca}
+and~\ref{fig:decoding} describe where the population activity sits.
+They do not say why it sits there.
+To answer that, we treated the policy and the physics engine together as
+a single closed-loop system: at every step the policy reads the agent's
+state and outputs an acceleration, the physics engine integrates it, and
+the resulting state is fed back in.
+With the perturbation off, this closed loop is autonomous in the agent's
+physical state (lateral position $x$, forward position $y$, lateral
+velocity $v_x$, forward velocity $v_y$), and it can be analysed with
+standard tools from dynamical systems: a vector field describing how the
+state changes at every point, fixed points where that vector field is
+zero, and the local Jacobian's eigenvalues, which say whether a fixed
+point is stable and how quickly nearby states relax back to it.
+The policy itself is feedforward, so this fixed-point analysis is applied
+to the closed loop's physical state rather than to the hidden layer,
+which has no dynamics of its own to analyse.
+
+We found that the policy also conditions on a discrete route cue that
+determines which side of the obstacle pair the agent detours around.
+Every one of the 140 saved evaluation episodes took the same, left,
+detour, so we solved for the fixed point of the reduced lateral subsystem
+$(x, v_x)$ separately for the left route (matching the sampled data) and,
+as a prediction, for the right route.
+Both fixed points are locally stable, with two real eigenvalues below 1 in
+magnitude and no imaginary component, meaning the lateral state relaxes
+back to it smoothly rather than oscillating.
+The left-route fixed point sits at $x^{*}=3.32$~m with a relaxation time
+constant of 1.42~s; the right-route fixed point sits at $x^{*}=6.70$~m
+with a time constant of 1.35~s, close to a mirror image of the left about
+the corridor midline at $x=5.0$~m.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\linewidth]{fig7_attractor.png}
+  \caption{\textbf{A closed-loop fixed-point analysis explains the
+    location of the manifold and its clusters.}
+    \textbf{(A)}~Lateral phase portrait at the corridor height where the
+    perturbation is delivered ($y=5.0$~m), for the left- and right-detour
+    routes. Grey arrows show the closed-loop vector field (policy and
+    physics, perturbation off); coloured traces are real evaluation
+    episodes passing through this band, coloured by perturbation
+    condition as in Figure~\ref{fig:velocity}; the star marks the
+    numerically solved fixed point. The right-route panel is a
+    prediction, since the evaluation data sampled only the left route.
+    \textbf{(B)}~The fixed-point location $x^{*}(y)$ computed across the
+    full corridor height (dashed/dash-dot) tracks the empirical detour
+    path (light blue) within a few centimetres at every height.
+    \textbf{(C)}~The same fixed-point curves projected into the PC1-PC2
+    space used for the clustering analysis in Figure~\ref{fig:pca},
+    overlaid on the evaluation-condition scatter. The curves sit on the
+    same manifold that the four phase-aligned clusters partition, at the
+    location corresponding to steady, corrected cruising.}
+  \label{fig:attractor}
+\end{figure}
+
+\FloatBarrier
+
+This gives a geometric account of two findings already reported
+descriptively.
+First, the partial reconvergence of lateral velocity after the
+perturbation window (Figure~\ref{fig:velocity}A) is the closed loop
+relaxing back toward this fixed point; the two eigenvalues, both real and
+below 1 in magnitude, are why the reconvergence is smooth rather than
+oscillatory.
+Second, the four phase-aligned clusters in Figure~\ref{fig:pca}B are not
+arbitrary regions of the manifold: Figure~\ref{fig:attractor}C shows that
+the fixed-point curve for each route sits at a specific location on the
+same PC1-PC2 manifold, corresponding to steady cruising once the agent has
+settled into its detour.
+Clusters closer to this location correspond to the cruising phase; those
+farther from it correspond to the approach and correction phases.
+
+The fixed-point locations also make the direction-dependent robustness
+asymmetry reported above quantitative rather than only descriptive.
+The obstacles sit at $x=4.25$~m and $x=5.75$~m with radius 0.5~m, so the
+left-route fixed point at $x^{*}=3.32$~m leaves roughly 0.43~m of
+clearance from the near obstacle edge.
+A rightward perturbation pushes the agent toward that same near obstacle
+it is already closest to; a leftward perturbation of equal magnitude
+pushes it away, into open space.
+The two fixed points themselves are close to symmetric, in both location
+and relaxation time constant, so the asymmetry is a property of clearance
+relative to a fixed attractor, not of the corrective mechanism itself
+being weaker in one direction.
+
 %==============================================================
 \section{Discussion}
 %==============================================================
