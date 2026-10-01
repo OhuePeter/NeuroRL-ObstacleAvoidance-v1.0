@@ -53,3 +53,15 @@ experiments/version_2_0/results/neural_analysis/*
 Thumbs.db
 
 presentation/poster/output/
+
+# Office lock/temp files
+~$*
+~WRL*.tmp
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz

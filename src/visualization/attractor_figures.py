@@ -52,6 +52,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 from src.neural_analysis.attractor_analysis import AttractorAnalysis
 from src.visualization.colors import COLORS
@@ -343,6 +344,9 @@ class AttractorFigures:
         X = dataset["activations"]
         condition = dataset["condition"]
 
+        # NOTE: deliberately unscaled to match scripts/build_fig4_pca.py -
+        # the fixed-point curves only land on the evaluation manifold under
+        # unscaled PCA; see note there for why standardizing breaks this.
         pca = PCA(n_components=2)
         scores = pca.fit_transform(X)
 

@@ -2,6 +2,21 @@
 
 This guide provides a clean and reproducible workflow for creating and maintaining a fork.
 
+## 0. Collaboration branch
+
+Active collaborators (not external forks) should work directly from the
+`collaborator/attractor-analysis` branch on the main repository, not `main`.
+Clone, then checkout that branch, and open pull requests against it:
+
+```bash
+git clone https://github.com/OhuePeter/NeuroRL-ObstacleAvoidance-v1.0.git
+cd NeuroRL-ObstacleAvoidance-v1.0
+git checkout collaborator/attractor-analysis
+```
+
+The steps below (fork, upstream remote, feature branches) are for external
+contributors without direct write access.
+
 ## 1. Fork on GitHub
 
 1. Open the repository page.
