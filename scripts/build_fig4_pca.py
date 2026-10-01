@@ -77,12 +77,12 @@ def main():
     condition = dataset["condition"]
     timestep = dataset["timestep"]
 
-    # Units are z-scored before PCA since raw hidden-unit variance is
-    # highly heterogeneous; this matches the standardized-PCA convention
-    # used in the rest of the neural analysis pipeline.
-    activations_z = StandardScaler().fit_transform(activations)
+    # NOTE: deliberately unscaled. Figure 7's fixed-point curves are
+    # projected into this same PCA space (src/visualization/attractor_figures.py)
+    # and only land on the evaluation manifold under unscaled PCA; standardizing
+    # breaks that correspondence, which is the figure's main mechanistic claim.
     pca = PCA(n_components=2)
-    scores = pca.fit_transform(activations_z)
+    scores = pca.fit_transform(activations)
 
     var_pc1 = 100 * pca.explained_variance_ratio_[0]
     var_pc2 = 100 * pca.explained_variance_ratio_[1]
