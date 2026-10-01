@@ -19,12 +19,12 @@
 \setlength{\parskip}{7pt}
 \linespread{1.15}
 
-\newcommand{\PCAVarI}{46.8\%}
-\newcommand{\PCAVarII}{28.0\%}
-\newcommand{\PCAVarTotal}{74.8\%}
+\newcommand{\PCAVarI}{68.0\%}
+\newcommand{\PCAVarII}{25.3\%}
+\newcommand{\PCAVarTotal}{93.3\%}
 
-\title{\textbf{Neural Population Dynamics Reveal Internal Representations
-Underlying Adaptive Obstacle Avoidance in Reinforcement Learning}}
+\title{\textbf{Obstacle Avoidance Under Perturbation: A Closed-Loop
+Attractor Account of Neural Population Dynamics in Reinforcement Learning}}
 
 \author[1]{Peter Ohue}
 \author[1]{Emily Oby}
@@ -421,6 +421,67 @@ conditions.
 All analyses were implemented in Python using NumPy, SciPy, and
 scikit-learn.
 
+\subsection{Dynamical-Systems Framework for the Closed Loop}
+\label{sec:dynsys}
+
+PCA, clustering, and decoding describe \emph{where} the population
+activity sits. They do not say \emph{why} it sits there. To answer that,
+we treat the trained policy and the physics engine together as a single
+closed-loop dynamical system and analyse it with the standard vocabulary
+of dynamical-systems theory. We introduce that vocabulary here, in the
+terms it takes in this specific task, so that the mechanistic claims in
+Section~\ref{sec:results-attractor} can be read without outside
+reference.
+
+\textbf{State, trajectory, vector field.}
+A dynamical system is a rule for how a state changes over time. Here the
+state is the agent's physical situation: lateral position $x$, forward
+position $y$, lateral velocity $v_x$, forward velocity $v_y$. At every
+timestep the policy reads the state (plus the fixed goal and obstacle
+geometry) and outputs an acceleration; the physics engine integrates that
+acceleration into a new velocity and position. Chaining this over many
+steps produces a \emph{trajectory}, exactly the $(x,y)$ paths already
+plotted in Figure~\ref{fig:trajectories}. The \emph{vector field} is the
+same rule evaluated everywhere at once: at every point in the state
+space, it specifies which direction and how fast the state moves next. A
+trajectory is one path through the vector field; the vector field is the
+full set of paths the system could take from anywhere.
+
+\textbf{Fixed points, stability, attractors.}
+A \emph{fixed point} is a state where the vector field is zero: nothing
+changes if the system starts exactly there. In this task, that means zero
+lateral velocity and zero commanded lateral acceleration, the controller
+has stopped correcting sideways and is content to keep going straight up
+the corridor. Whether a fixed point matters behaviourally depends on its
+\emph{stability}. Perturbing the state slightly and linearising the
+vector field around the fixed point yields a matrix, the \emph{Jacobian},
+whose eigenvalues describe what happens next. In discrete time (the
+simulation advances in fixed steps of $dt=0.05$~s), an eigenvalue with
+magnitude below 1 means that direction decays back to the fixed point, an
+\emph{attractor} along that direction; magnitude above 1 means it grows
+away, a \emph{repeller}; a nonzero imaginary part means the decay
+oscillates on the way back in rather than returning in a straight line. A
+fixed point's \emph{basin of attraction} is the set of starting states
+that eventually settle there, and two different attractors can coexist in
+the same system (\emph{multistability}) provided their basins do not
+overlap.
+
+\textbf{Why a feedforward policy still has a closed loop.}
+The classic version of this analysis (Sussillo and Barak, 2013) finds
+fixed points of a recurrent network's own hidden state, because a
+recurrent unit's activity at time $t+1$ is a function of its activity at
+time $t$. Our policy is feedforward: the 256-unit hidden layer analysed
+in Figure~\ref{fig:pca} is a static function of the instantaneous
+observation, $h_t = g(s_t)$, with no memory of its own previous value, so
+``the fixed points of the hidden layer'' is not a well-posed question
+here. What \emph{is} well posed, and what we compute instead, is the
+fixed points of the closed loop formed by the policy and the
+environment's physics, in the agent's physical state space. This is a
+legitimate substitute for the recurrent-network case, and is arguably
+more interpretable here, since the state space $(x,y,v_x,v_y)$ already
+carries physical units and meaning, unlike an RNN's abstract hidden
+units.
+
 %==============================================================
 \section{Results}
 %==============================================================
@@ -488,7 +549,7 @@ lateral velocity and total speed across all seven conditions.
   \includegraphics[width=0.80\linewidth]{fig3_velocity.png}
   \caption{\textbf{Velocity profiles reveal proportional perturbation
     encoding and preserved movement tempo.}
-    \textbf{(A)}~Mean lateral velocity (horizontal component of velocity
+    \textbf{(I)}~Mean lateral velocity (horizontal component of velocity
     vector) over time, aligned to movement onset and averaged across all
     episodes within each condition. Shaded regions show $\pm$1\,SD,
     conveying trial-to-trial variability. Leftward conditions (L1--L3)
@@ -501,7 +562,7 @@ lateral velocity and total speed across all seven conditions.
     Critically, the magnitude of lateral deflection scales with perturbation
     strength within each direction, suggesting a graded, analogue
     corrective mechanism.
-    \textbf{(B)}~Total speed (Euclidean norm of the velocity vector)
+    \textbf{(II)}~Total speed (Euclidean norm of the velocity vector)
     plotted as a function of normalised movement phase (0 = movement onset,
     100 = goal arrival). Speed rises steeply at movement onset, reaching
     a plateau that is maintained consistently across all seven perturbation
@@ -514,7 +575,7 @@ lateral velocity and total speed across all seven conditions.
   \label{fig:velocity}
 \end{figure}
 
-Panel~A shows that lateral velocity separated cleanly and systematically
+Panel~I shows that lateral velocity separated cleanly and systematically
 by perturbation direction throughout the active perturbation window.
 Leftward conditions produced negative lateral velocity; rightward
 conditions produced positive lateral velocity; and in both directions the
@@ -525,7 +586,7 @@ the controller is generating a corrective force proportional to the
 sensed displacement rather than a binary switch between pre-programmed
 response modes.
 
-Panel~B confirms that total movement speed was essentially invariant
+Panel~II confirms that total movement speed was essentially invariant
 across all seven conditions.
 The controller increases speed rapidly at movement onset, reaches a plateau,
 and maintains that plateau uniformly regardless of whether a perturbation is
@@ -548,7 +609,7 @@ evaluation timesteps.
     Each point represents the 256-dimensional hidden-state vector at one
     evaluation timestep, projected onto the first two principal components
     of the entire evaluation dataset.
-    \textbf{(A)}~Points are coloured by perturbation condition (see
+    \textbf{(I)}~Points are coloured by perturbation condition (see
     legend). The population activity traces a characteristic curved
     manifold whose gross shape is shared across all seven conditions.
     Conditions are not cleanly separated (they overlap substantially)
@@ -559,7 +620,7 @@ evaluation timesteps.
     together they capture \PCAVarTotal{} of the variance in a
     256-dimensional network, demonstrating a high degree of dimensionality
     compression.
-    \textbf{(B)}~The same projection coloured by $K$-means cluster label
+    \textbf{(II)}~The same projection coloured by $K$-means cluster label
     ($K=4$). Four spatially coherent clusters emerge that partition the
     manifold into anatomically distinct regions. These clusters are not
     condition-specific: each cluster contains timesteps from all seven
@@ -716,20 +777,15 @@ obstacle-avoidance and reaching tasks in the RL literature
 The clustering and decoding results in Figures~\ref{fig:pca}
 and~\ref{fig:decoding} describe where the population activity sits.
 They do not say why it sits there.
+\label{sec:results-attractor}
 To answer that, we treated the policy and the physics engine together as
-a single closed-loop system: at every step the policy reads the agent's
-state and outputs an acceleration, the physics engine integrates it, and
-the resulting state is fed back in.
+a single closed-loop system, using the dynamical-systems framework
+introduced in Section~\ref{sec:dynsys}: at every step the policy reads
+the agent's state and outputs an acceleration, the physics engine
+integrates it, and the resulting state is fed back in.
 With the perturbation off, this closed loop is autonomous in the agent's
-physical state (lateral position $x$, forward position $y$, lateral
-velocity $v_x$, forward velocity $v_y$), and it can be analysed with
-standard tools from dynamical systems: a vector field describing how the
-state changes at every point, fixed points where that vector field is
-zero, and the local Jacobian's eigenvalues, which say whether a fixed
-point is stable and how quickly nearby states relax back to it.
-The policy itself is feedforward, so this fixed-point analysis is applied
-to the closed loop's physical state rather than to the hidden layer,
-which has no dynamics of its own to analyse.
+physical state $(x, y, v_x, v_y)$, so its fixed points and their
+stability can be computed directly.
 
 We found that the policy also conditions on a discrete route cue that
 determines which side of the obstacle pair the agent detours around.
@@ -750,7 +806,7 @@ the corridor midline at $x=5.0$~m.
   \includegraphics[width=0.95\linewidth]{fig7_attractor.png}
   \caption{\textbf{A closed-loop fixed-point analysis explains the
     location of the manifold and its clusters.}
-    \textbf{(A)}~Lateral phase portrait at the corridor height where the
+    \textbf{(I)}~Lateral phase portrait at the corridor height where the
     perturbation is delivered ($y=5.0$~m), for the left- and right-detour
     routes. Grey arrows show the closed-loop vector field (policy and
     physics, perturbation off); coloured traces are real evaluation
@@ -758,10 +814,10 @@ the corridor midline at $x=5.0$~m.
     condition as in Figure~\ref{fig:velocity}; the star marks the
     numerically solved fixed point. The right-route panel is a
     prediction, since the evaluation data sampled only the left route.
-    \textbf{(B)}~The fixed-point location $x^{*}(y)$ computed across the
+    \textbf{(II)}~The fixed-point location $x^{*}(y)$ computed across the
     full corridor height (dashed/dash-dot) tracks the empirical detour
     path (light blue) within a few centimetres at every height.
-    \textbf{(C)}~The same fixed-point curves projected into the PC1-PC2
+    \textbf{(III)}~The same fixed-point curves projected into the PC1-PC2
     space used for the clustering analysis in Figure~\ref{fig:pca},
     overlaid on the evaluation-condition scatter. The curves sit on the
     same manifold that the four phase-aligned clusters partition, at the
@@ -774,12 +830,12 @@ the corridor midline at $x=5.0$~m.
 This gives a geometric account of two findings already reported
 descriptively.
 First, the partial reconvergence of lateral velocity after the
-perturbation window (Figure~\ref{fig:velocity}A) is the closed loop
+perturbation window (Figure~\ref{fig:velocity}I) is the closed loop
 relaxing back toward this fixed point; the two eigenvalues, both real and
 below 1 in magnitude, are why the reconvergence is smooth rather than
 oscillatory.
-Second, the four phase-aligned clusters in Figure~\ref{fig:pca}B are not
-arbitrary regions of the manifold: Figure~\ref{fig:attractor}C shows that
+Second, the four phase-aligned clusters in Figure~\ref{fig:pca}II are not
+arbitrary regions of the manifold: Figure~\ref{fig:attractor}III shows that
 the fixed-point curve for each route sits at a specific location on the
 same PC1-PC2 manifold, corresponding to steady cruising once the agent has
 settled into its detour.
@@ -830,7 +886,7 @@ that reshape the movement path without systematically altering movement
 speed \citep{Pruszynski2012,Nashed2014,FlashHogan1985,Scott2004,Dimitriou2013,Shadmehr1994,Diedrichsen2010}.
 The PPO controller exhibits precisely this dissociation: it modulates
 path geometry in proportion to the applied force while keeping the overall
-movement tempo constant across all seven conditions (Figure~\ref{fig:velocity}B).
+movement tempo constant across all seven conditions (Figure~\ref{fig:velocity}II).
 
 We are careful not to overstate this correspondence.
 The point-mass dynamics are far simpler than those of a biological limb;
@@ -883,7 +939,7 @@ because all reaching movements share a common temporal structure
 states across all trials are necessarily correlated, and a small number
 of principal components suffice to capture that shared structure.
 
-The four-cluster decomposition of the manifold (Figure~\ref{fig:pca}B)
+The four-cluster decomposition of the manifold (Figure~\ref{fig:pca}II)
 provides a complementary view.
 The clusters partition the manifold spatially, and because they do not
 separate perturbation conditions they most naturally correspond to movement
