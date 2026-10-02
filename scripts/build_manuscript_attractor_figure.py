@@ -15,7 +15,10 @@ resolution convention used for the other manuscript figures
 (paper/fig1_schematic.png ... fig6_learning.png).
 
 Fonts are set to Arial 10pt throughout (COSYNE convention);
-panel labels use Roman numerals rather than letters.
+panel labels use Roman numerals rather than letters. Panel
+sizes are computed from each source image's pixel aspect
+ratio (not a fixed grid ratio), so there is no dead space
+between rows.
 
 Usage
 -----
@@ -37,27 +40,46 @@ SOURCE = Path("experiments/version_1_0/results/neural_analysis/attractor")
 OUTPUT_PNG = Path("paper/fig7_attractor.png")
 OUTPUT_SVG = Path("paper/figures/fig7_attractor.svg")
 
-fig = plt.figure(figsize=(10, 9.5))
+TOTAL_WIDTH = 10.0       # inches
+COLUMN_GAP = 0.2         # inches, between panel II and panel III
+ROW_GAP = 0.35           # inches, between the top row and the bottom row
+LABEL_STRIP = 0.3        # inches reserved above each row for the label
+MARGIN = 0.1             # inches, outer margin on all sides
 
-grid = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.15], hspace=0.18, wspace=0.08)
+images = {
+    "I": mpimg.imread(SOURCE / "fig_attractor_phase_portrait.png"),
+    "II": mpimg.imread(SOURCE / "fig_attractor_path.png"),
+    "III": mpimg.imread(SOURCE / "fig_attractor_latent.png"),
+}
+aspect = {key: img.shape[0] / img.shape[1] for key, img in images.items()}
 
-ax_a = fig.add_subplot(grid[0, :])
-ax_b = fig.add_subplot(grid[1, 0])
-ax_c = fig.add_subplot(grid[1, 1])
+row0_width = TOTAL_WIDTH - 2 * MARGIN
+row0_height = row0_width * aspect["I"]
 
-panels = (
-    (ax_a, "fig_attractor_phase_portrait.png", "I"),
-    (ax_b, "fig_attractor_path.png", "II"),
-    (ax_c, "fig_attractor_latent.png", "III"),
+usable_width = TOTAL_WIDTH - 2 * MARGIN - COLUMN_GAP
+row1_height = usable_width / (1 / aspect["II"] + 1 / aspect["III"])
+col_width_ii = row1_height / aspect["II"]
+col_width_iii = row1_height / aspect["III"]
+
+fig_width = TOTAL_WIDTH
+fig_height = (
+    MARGIN + LABEL_STRIP + row0_height + ROW_GAP
+    + LABEL_STRIP + row1_height + MARGIN
 )
 
-for ax, filename, label in panels:
+fig = plt.figure(figsize=(fig_width, fig_height))
 
-    image = mpimg.imread(SOURCE / filename)
 
+def add_panel(x0, y0_from_top, width, height, image, label):
+    rect = [
+        x0 / fig_width,
+        1 - (y0_from_top + height) / fig_height,
+        width / fig_width,
+        height / fig_height,
+    ]
+    ax = fig.add_axes(rect)
     ax.imshow(image)
     ax.axis("off")
-
     ax.text(
         0.0, 1.02, label,
         transform=ax.transAxes,
@@ -67,10 +89,18 @@ for ax, filename, label in panels:
         ha="left",
     )
 
-fig.savefig(OUTPUT_PNG, dpi=300, bbox_inches="tight", facecolor="white")
+
+top_y = MARGIN + LABEL_STRIP
+add_panel(MARGIN, top_y, row0_width, row0_height, images["I"], "I")
+
+bottom_y = top_y + row0_height + ROW_GAP + LABEL_STRIP
+add_panel(MARGIN, bottom_y, col_width_ii, row1_height, images["II"], "II")
+add_panel(MARGIN + col_width_ii + COLUMN_GAP, bottom_y, col_width_iii, row1_height, images["III"], "III")
+
+fig.savefig(OUTPUT_PNG, dpi=300, facecolor="white")
 
 OUTPUT_SVG.parent.mkdir(parents=True, exist_ok=True)
-fig.savefig(OUTPUT_SVG, bbox_inches="tight", facecolor="white")
+fig.savefig(OUTPUT_SVG, facecolor="white")
 
 plt.close(fig)
 

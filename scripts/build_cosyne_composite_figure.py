@@ -22,6 +22,14 @@ only adds the outer I/II/III labels that identify which
 main-text figure each block reproduces, matching the existing
 COSYNE abstract caption.
 
+Panel sizes are computed directly from each source image's
+pixel aspect ratio (not a fixed grid ratio), so the two top
+panels exactly fill the row with no dead space, and the
+bottom panel's height matches its own aspect ratio. The
+caption text is intentionally not baked into the image: the
+abstract already carries the caption as separate, editable
+text, and duplicating it here just wastes vertical space.
+
 Fonts are set to Arial 10pt throughout (COSYNE convention); text
 is kept editable in the SVG output.
 
@@ -52,17 +60,11 @@ SOURCES = {
     "III": PAPER / "fig7_attractor.png",
 }
 
-CAPTION = (
-    "Figure. Obstacle avoidance and its mechanism. (I) Trajectories bend "
-    "with perturbation strength; dashed lines mark failures, which occur "
-    "at the strongest rightward impulses. (II) Hidden-layer activity "
-    "forms a compact PC1-PC2 manifold with four phase-aligned clusters. "
-    "(III) Closed-loop analysis identifies one stable fixed point per "
-    "detour route. The fixed-point curves track the empirical paths and "
-    "occupy the same manifold region as the evaluation activity. Reduced "
-    "obstacle clearance on the left route is consistent with the higher "
-    "failure rate under rightward perturbations."
-)
+TOTAL_WIDTH = 11.0        # inches
+COLUMN_GAP = 0.15         # inches, between panel I and panel II
+ROW_GAP = 0.35            # inches, between the top row and panel III
+LABEL_STRIP = 0.3         # inches reserved above each row for the I/II/III label
+MARGIN = 0.15             # inches, outer margin on all sides
 
 
 def panel_label(ax, label):
@@ -76,23 +78,51 @@ def panel_label(ax, label):
 
 def main():
 
-    fig = plt.figure(figsize=(12, 13))
-    grid = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.05], hspace=0.14, wspace=0.06)
+    images = {key: mpimg.imread(path) for key, path in SOURCES.items()}
+    # aspect = height / width, read directly from each PNG's pixel shape
+    aspect = {key: img.shape[0] / img.shape[1] for key, img in images.items()}
 
-    ax_i = fig.add_subplot(grid[0, 0])
-    ax_ii = fig.add_subplot(grid[0, 1])
-    ax_iii = fig.add_subplot(grid[1, :])
+    # Choose column widths w1, w2 (for panels I, II) so that, at those
+    # widths, both images need exactly the same row height: this is what
+    # removes the dead space that a fixed grid ratio otherwise leaves.
+    usable_width = TOTAL_WIDTH - 2 * MARGIN - COLUMN_GAP
+    row0_height = usable_width / (1 / aspect["I"] + 1 / aspect["II"])
+    col_width_i = row0_height / aspect["I"]
+    col_width_ii = row0_height / aspect["II"]
 
-    for ax, key in ((ax_i, "I"), (ax_ii, "II"), (ax_iii, "III")):
-        image = mpimg.imread(SOURCES[key])
+    row1_width = TOTAL_WIDTH - 2 * MARGIN
+    row1_height = row1_width * aspect["III"]
+
+    fig_width = TOTAL_WIDTH
+    fig_height = (
+        MARGIN + LABEL_STRIP + row0_height + ROW_GAP
+        + LABEL_STRIP + row1_height + MARGIN
+    )
+
+    fig = plt.figure(figsize=(fig_width, fig_height))
+
+    def add_panel(x0, y0_from_top, width, height, image, label):
+        # y0_from_top is measured from the top of the figure, in inches.
+        rect = [
+            x0 / fig_width,
+            1 - (y0_from_top + height) / fig_height,
+            width / fig_width,
+            height / fig_height,
+        ]
+        ax = fig.add_axes(rect)
         ax.imshow(image)
         ax.axis("off")
-        panel_label(ax, key)
+        panel_label(ax, label)
 
-    fig.text(0.02, 0.012, CAPTION, ha="left", va="bottom", fontsize=9, wrap=True)
+    top_y = MARGIN + LABEL_STRIP
+    add_panel(MARGIN, top_y, col_width_i, row0_height, images["I"], "I")
+    add_panel(MARGIN + col_width_i + COLUMN_GAP, top_y, col_width_ii, row0_height, images["II"], "II")
 
-    fig.savefig(OUTPUT_PNG, dpi=300, bbox_inches="tight", facecolor="white")
-    fig.savefig(OUTPUT_SVG, bbox_inches="tight", facecolor="white")
+    bottom_y = top_y + row0_height + ROW_GAP + LABEL_STRIP
+    add_panel(MARGIN, bottom_y, row1_width, row1_height, images["III"], "III")
+
+    fig.savefig(OUTPUT_PNG, dpi=300, facecolor="white")
+    fig.savefig(OUTPUT_SVG, facecolor="white")
 
     plt.close(fig)
 
