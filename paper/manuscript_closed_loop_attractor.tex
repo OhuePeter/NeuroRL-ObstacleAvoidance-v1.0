@@ -549,19 +549,24 @@ lateral velocity and total speed across all seven conditions.
   \includegraphics[width=0.80\linewidth]{fig3_velocity.png}
   \caption{\textbf{Velocity profiles reveal proportional perturbation
     encoding and preserved movement tempo.}
-    \textbf{(I)}~Mean lateral velocity (horizontal component of velocity
-    vector) over time, aligned to movement onset and averaged across all
-    episodes within each condition. Shaded regions show $\pm$1\,SD,
-    conveying trial-to-trial variability. Leftward conditions (L1--L3)
-    drive the agent into negative lateral velocity (moving left), while
-    rightward conditions (R1--R3) drive it into positive lateral velocity
-    (moving right). Conditions diverge sharply during the perturbation
-    window (timesteps 50--55, indicated by the vertical markers) and then
-    partially reconverge, consistent with the generation of a proportional
-    corrective response rather than a stereotyped binary reaction.
-    Critically, the magnitude of lateral deflection scales with perturbation
-    strength within each direction, suggesting a graded, analogue
-    corrective mechanism.
+    \textbf{(I)}~Mean lateral velocity, expressed as a deviation from the
+    unperturbed (P0) trajectory ($\Delta v_x$), over time, aligned to
+    movement onset and averaged across all episodes within each condition.
+    Shaded regions show $\pm$1\,SD, conveying trial-to-trial variability.
+    We plot the deviation from P0 rather than raw lateral velocity because
+    every saved episode takes the same left-detour route, so even the
+    unperturbed trajectory has substantial negative lateral velocity in
+    this window; subtracting it isolates the perturbation response itself.
+    Leftward conditions (L1--L3) push $\Delta v_x$ negative, while
+    rightward conditions (R1--R3) push it positive, exactly during the
+    perturbation window (timesteps 50--55, indicated by the shaded band).
+    Immediately afterward, both directions swing past zero into a larger
+    corrective overshoot of the opposite sign before relaxing back toward
+    the unperturbed trajectory, consistent with a proportional corrective
+    response rather than a stereotyped binary reaction. Critically, the
+    magnitude of the initial deflection scales with perturbation strength
+    within each direction, suggesting a graded, analogue corrective
+    mechanism.
     \textbf{(II)}~Total speed (Euclidean norm of the velocity vector)
     plotted as a function of normalised movement phase (0 = movement onset,
     100 = goal arrival). Speed rises steeply at movement onset, reaching
@@ -575,16 +580,17 @@ lateral velocity and total speed across all seven conditions.
   \label{fig:velocity}
 \end{figure}
 
-Panel~I shows that lateral velocity separated cleanly and systematically
-by perturbation direction throughout the active perturbation window.
-Leftward conditions produced negative lateral velocity; rightward
-conditions produced positive lateral velocity; and in both directions the
-magnitude of the lateral deflection scaled with perturbation strength.
-Following the end of the perturbation window, conditions on the same side
-partially reconverged toward the unperturbed trajectory, a signature that
-the controller is generating a corrective force proportional to the
-sensed displacement rather than a binary switch between pre-programmed
-response modes.
+Panel~I shows that the deviation in lateral velocity from the unperturbed
+trajectory separated cleanly and systematically by perturbation direction
+during the active perturbation window. Leftward conditions pushed
+$\Delta v_x$ negative; rightward conditions pushed it positive; and in
+both directions the magnitude of the initial deflection scaled with
+perturbation strength. Immediately after the perturbation window,
+conditions on both sides swung past zero into a corrective overshoot of
+the opposite sign before relaxing back toward the unperturbed trajectory,
+a signature that the controller is generating a corrective force
+proportional to the sensed displacement rather than a binary switch
+between pre-programmed response modes.
 
 Panel~II confirms that total movement speed was essentially invariant
 across all seven conditions.
@@ -640,7 +646,13 @@ Two findings emerge from this analysis.
 The first is the degree of dimensionality compression.
 Despite the policy network having 256 hidden units in its first layer,
 \PCAVarTotal{} of the variance in the activation patterns collapses onto
-just two dimensions.
+just two dimensions.\footnote{An earlier conference abstract and the
+associated grant proposal reported a lower figure (74.8\%, PC1 46.8\%,
+PC2 28.0\%) from a preliminary analysis run whose raw per-episode
+activations are no longer available for re-verification. The value
+reported here is computed directly from the evaluation data archived in
+this repository (\texttt{experiments/version\_1\_0}) and is the one that
+should be cited going forward.}
 This is a striking degree of compression, comparable in magnitude to
 the low-dimensional manifold structure reported for motor cortex activity
 during reaching in both non-human primates and humans
@@ -829,11 +841,16 @@ the corridor midline at $x=5.0$~m.
 
 This gives a geometric account of two findings already reported
 descriptively.
-First, the partial reconvergence of lateral velocity after the
-perturbation window (Figure~\ref{fig:velocity}I) is the closed loop
-relaxing back toward this fixed point; the two eigenvalues, both real and
-below 1 in magnitude, are why the reconvergence is smooth rather than
-oscillatory.
+First, the corrective overshoot and subsequent reconvergence of lateral
+velocity after the perturbation window (Figure~\ref{fig:velocity}I) is the
+closed loop relaxing back toward this fixed point. The two eigenvalues,
+both real and below 1 in magnitude, describe the local, infinitesimal-
+perturbation dynamics right at the fixed point, where the approach is
+smooth rather than oscillatory; the applied force impulses are not
+infinitesimal, so the empirical trace also reflects the policy's
+finite-amplitude nonlinear correction, which is why the lateral-velocity
+deviation swings past zero once before settling rather than decaying
+monotonically.
 Second, the four phase-aligned clusters in Figure~\ref{fig:pca}II are not
 arbitrary regions of the manifold: Figure~\ref{fig:attractor}III shows that
 the fixed-point curve for each route sits at a specific location on the

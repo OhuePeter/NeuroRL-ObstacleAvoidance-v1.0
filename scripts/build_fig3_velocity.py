@@ -76,24 +76,35 @@ def load_condition_kinematics(condition):
 
 def plot_lateral_velocity(ax, kinematics_by_condition):
 
+    # Raw vx is dominated by route geometry: every saved episode takes the
+    # same left detour, so even the unperturbed (P0) trajectory has
+    # substantial negative vx during this window. The perturbation-induced
+    # correction only becomes visible once that shared route baseline is
+    # subtracted out, so this panel plots the deviation from the P0 mean
+    # rather than raw vx.
+    min_len_all = min(len(e) for episodes in kinematics_by_condition.values() for e in episodes)
+    p0_episodes = kinematics_by_condition["P0"]
+    p0_vx = np.stack([e["vx"].to_numpy()[:min_len_all] for e in p0_episodes])
+    p0_mean_vx = p0_vx.mean(axis=0)
+
     for condition in CONDITIONS:
 
         episodes = kinematics_by_condition[condition]
-        min_len = min(len(e) for e in episodes)
-        vx = np.stack([e["vx"].to_numpy()[:min_len] for e in episodes])
+        vx = np.stack([e["vx"].to_numpy()[:min_len_all] for e in episodes])
 
-        mean_vx = vx.mean(axis=0)
-        sd_vx = vx.std(axis=0)
-        steps = np.arange(min_len)
+        deviation = vx - p0_mean_vx
+        mean_dev = deviation.mean(axis=0)
+        sd_dev = deviation.std(axis=0)
+        steps = np.arange(min_len_all)
 
         colour = CONDITION_COLOURS[condition]
-        ax.plot(steps, mean_vx, color=colour, lw=1.4, label=condition)
-        ax.fill_between(steps, mean_vx - sd_vx, mean_vx + sd_vx, color=colour, alpha=0.12, linewidth=0)
+        ax.plot(steps, mean_dev, color=colour, lw=1.4, label=condition)
+        ax.fill_between(steps, mean_dev - sd_dev, mean_dev + sd_dev, color=colour, alpha=0.12, linewidth=0)
 
     ax.axvspan(*PERTURB_STEPS, color="#d4edda", alpha=0.5, zorder=0)
     ax.axhline(0, color="black", lw=0.6, alpha=0.5)
     ax.set_xlabel("Step")
-    ax.set_ylabel("Lateral velocity $v_x$ (a.u./s)")
+    ax.set_ylabel("Lateral velocity deviation from P0, $\\Delta v_x$ (a.u./s)")
     ax.legend(frameon=False, fontsize=7.5, ncol=2, loc="lower right")
     ax.spines[["top", "right"]].set_visible(False)
 
