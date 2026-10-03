@@ -64,9 +64,9 @@ and linear decoding to ask what internal representations track behaviour
 and distinguish recovery from failure.
 
 We find that the controller adapts successfully to moderate perturbations
-across all directions but fails progressively under strong rightward
-disturbances, revealing a direction-dependent asymmetry in robustness that
-traces back to the geometry of the learned corridor trajectory.
+in both directions but fails once a strong impulse pushes it toward the
+obstacle pair, so robustness depends on the push direction relative to the
+detour route the controller is following.
 The hidden-layer activity organises into a compact low-dimensional manifold,
 with the large majority of population variance captured in just two principal
 components, and subdivides into four discrete clusters that correspond to
@@ -184,9 +184,9 @@ controllers that enables direct comparison with biological motor data.
 Second, we show that the controller's hidden-layer activity exhibits
 compact low-dimensional manifold structure consistent with neural manifold
 dynamics in motor cortex.
-Third, we identify a direction-dependent asymmetry in robustness, whereby
-rightward perturbations prove more disruptive than leftward ones of equal
-magnitude, visible in both behaviour and latent geometry.
+Third, we show that robustness depends on the push direction relative to the
+active detour: an impulse toward the obstacle pair is far more disruptive
+than one of the same size away from it.
 Fourth, we show that extreme perturbation conditions produce linearly
 separable latent representations while mild ones do not, mirroring the
 difficulty-dependent separability observed in biological neural population
@@ -305,6 +305,7 @@ was the dominant objective while collision avoidance remained a hard
 constraint in practice.
 
 \subsection{Perturbation Protocol}
+\label{sec:methods-perturbation}
 
 To probe the controller's capacity for online correction, we applied
 transient lateral force impulses mid-movement during evaluation.
@@ -519,9 +520,9 @@ toward the right.
     The controller maintained complete goal success under control and all
     mild conditions; success declined only under the two strongest rightward
     disturbances and under the largest leftward impulse, with rightward
-    perturbations proving disproportionately disruptive, a geometric
-    consequence of the controller having learned a trajectory that runs
-    slightly to the left of corridor centre.}
+    perturbations proving disproportionately disruptive on the left detour
+    that every plotted episode followed, because a rightward push drives the
+    agent toward the obstacle pair.}
   \label{fig:trajectories}
 \end{figure}
 
@@ -529,14 +530,12 @@ Goal success declined only at the two strongest rightward magnitudes
 (R2 and R3) and at the largest leftward magnitude (L3).
 Notably, rightward perturbations were more disruptive than leftward ones
 of the same nominal force.
-This directional asymmetry is a geometric consequence of the learned
-trajectory: the controller settles on a path that runs slightly to the
-left of the corridor midline, giving it more clearance from the left
-obstacle and less from the right.
-An equivalent rightward push therefore risks collision with the right
-obstacle before a sufficient correction can be generated, while an
-equivalent leftward push carries the agent away from the right obstacle
-into a region with more room to correct.
+Every episode in this evaluation took the left detour, and on that detour a
+rightward push drives the agent toward the obstacle pair while a leftward
+push carries it away from them into open space.
+The asymmetry is therefore a property of push direction relative to the
+route, not of the corrective mechanism being weaker in one direction;
+Section~\ref{sec:results-attractor} tests this with both routes in use.
 Across all successful trials, peak speed was effectively constant across
 conditions; adaptation was expressed entirely through lateral path geometry,
 not through modulation of movement tempo.
@@ -799,78 +798,93 @@ With the perturbation off, this closed loop is autonomous in the agent's
 physical state $(x, y, v_x, v_y)$, so its fixed points and their
 stability can be computed directly.
 
-We found that the policy also conditions on a discrete route cue that
-determines which side of the obstacle pair the agent detours around.
-Every one of the 140 saved evaluation episodes took the same, left,
-detour, so we solved for the fixed point of the reduced lateral subsystem
-$(x, v_x)$ separately for the left route (matching the sampled data) and,
-as a prediction, for the right route.
+The policy also conditions on a discrete route cue that determines which
+side of the obstacle pair the agent detours around.
+In the rollouts behind Figure~\ref{fig:attractor} the cue alternated between
+episodes, so both detours are observed: 140 episodes per route, 20 for each
+of the seven conditions on each route, run with one checkpoint (the
+best-evaluation checkpoint) and one training seed.
+Impulses lasted 14 timesteps from step 40 and had magnitudes of 0.40, 0.60,
+and 0.85 (leftward) and 0.40, 0.65, and 1.80 (rightward), plus Gaussian
+jitter with a standard deviation of 0.05.
+These settings differ from the protocol in Section~\ref{sec:methods-perturbation}.
+We solved for the fixed point of the reduced lateral subsystem $(x, v_x)$ at
+$y=5.0$~m separately for each route.
 Both fixed points are locally stable, with two real eigenvalues below 1 in
-magnitude and no imaginary component, meaning the lateral state relaxes
-back to it smoothly rather than oscillating.
+magnitude and no imaginary component, so close to the fixed point the
+lateral state relaxes back smoothly rather than oscillating.
 The left-route fixed point sits at $x^{*}=3.32$~m with a relaxation time
-constant of 1.42~s; the right-route fixed point sits at $x^{*}=6.70$~m
-with a time constant of 1.35~s, close to a mirror image of the left about
+constant of 1.42~s; the right-route fixed point sits at $x^{*}=6.71$~m
+with a time constant of 1.34~s, close to a mirror image of the left about
 the corridor midline at $x=5.0$~m.
+Episodes that completed the detour crossed $y=5.0$~m at
+$3.43\pm0.03$~m on the left route ($n=120$) and $6.62\pm0.05$~m on the
+right route ($n=140$), which is 0.11~m and 0.09~m from the fixed points.
+These values depend on the checkpoint: the final checkpoint gives
+$x^{*}=3.62$~m and $6.47$~m with time constants of 0.64~s and 1.16~s, which
+are not close to mirror images.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.95\linewidth]{fig7_attractor.png}
-  \caption{\textbf{A closed-loop fixed-point analysis explains the
-    location of the manifold and its clusters.}
-    \textbf{(I)}~Lateral phase portrait at the corridor height where the
-    perturbation is delivered ($y=5.0$~m), for the left- and right-detour
-    routes. Grey arrows show the closed-loop vector field (policy and
-    physics, perturbation off); coloured traces are real evaluation
-    episodes passing through this band, coloured by perturbation
-    condition as in Figure~\ref{fig:velocity}; the star marks the
-    numerically solved fixed point. The right-route panel is a
-    prediction, since the evaluation data sampled only the left route.
-    \textbf{(II)}~The fixed-point location $x^{*}(y)$ computed across the
-    full corridor height (dashed/dash-dot) tracks the empirical detour
-    path (light blue) within a few centimetres at every height.
-    \textbf{(III)}~The same fixed-point curves projected into the PC1-PC2
-    space used for the clustering analysis in Figure~\ref{fig:pca},
-    overlaid on the evaluation-condition scatter. The curves sit on the
-    same manifold that the four phase-aligned clusters partition, at the
-    location corresponding to steady, corrected cruising.}
+  \includegraphics[width=0.95\linewidth]{figures/fig_composite_obstacle_avoidance_mechanism.png}
+  \caption{\textbf{A closed-loop fixed-point analysis recovers the detour the
+    controller follows, and failure depends on push direction.}
+    \textbf{(I)}~Reach trajectories for all seven conditions (colour) on
+    both detour routes. Dashed lines and crosses mark collisions. The grey
+    band is the span of heights at which the impulse acts (median over
+    control episodes, steps 40--53). Stars mark the closed-loop fixed points
+    at $y=5.0$~m.
+    \textbf{(II)}~PC1--PC2 of hidden-layer activity from the same rollouts,
+    coloured by step. The components are recomputed on these rollouts (70.7\%
+    of variance in two components) so that the fixed-point states are
+    projected through the same checkpoint that produced the activity. Black
+    curves are the fixed-point states $x^{*}(y)$ for the left (solid) and
+    right (dashed) route.
+    \textbf{(III)}~Commanded lateral acceleration at $y=5.0$~m with
+    $v_x=0$ and the forward speed at its plateau. Each route has one zero
+    crossing with a negative slope, which is the fixed point. The commanded
+    acceleration saturates at $\pm1$. Ticks along the bottom mark where
+    completed episodes crossed $y=5.0$~m. Collisions occurred only for the
+    largest rightward impulse on the left route (20 of 20 episodes).}
   \label{fig:attractor}
 \end{figure}
 
 \FloatBarrier
 
-This gives a geometric account of two findings already reported
-descriptively.
-First, the corrective overshoot and subsequent reconvergence of lateral
-velocity after the perturbation window (Figure~\ref{fig:velocity}I) is the
-closed loop relaxing back toward this fixed point. The two eigenvalues,
-both real and below 1 in magnitude, describe the local, infinitesimal-
-perturbation dynamics right at the fixed point, where the approach is
-smooth rather than oscillatory; the applied force impulses are not
-infinitesimal, so the empirical trace also reflects the policy's
-finite-amplitude nonlinear correction, which is why the lateral-velocity
-deviation swings past zero once before settling rather than decaying
-monotonically.
-Second, the four phase-aligned clusters in Figure~\ref{fig:pca}II are not
-arbitrary regions of the manifold: Figure~\ref{fig:attractor}III shows that
-the fixed-point curve for each route sits at a specific location on the
-same PC1-PC2 manifold, corresponding to steady cruising once the agent has
-settled into its detour.
-Clusters closer to this location correspond to the cruising phase; those
-farther from it correspond to the approach and correction phases.
+The fixed points relate to the behavioural results in three ways.
+First, they locate the detour. The lateral position at which completed
+episodes cross the obstacle band is within about 0.1~m of the fixed point,
+so the preferred detour can be read from the closed loop without reference
+to the trajectories.
+This match is local to the obstacle band. At other heights the agent is still
+moving toward or away from the detour, and the fixed-point path differs from
+the observed path by up to 1.7~m at $y=1.5$~m.
+Second, the fixed-point states lie within the region of recorded activity.
+The median distance from a fixed-point state to the nearest recorded point in
+PC1--PC2 is 0.35 units on the left route and 0.46 on the right, against 0.92
+and 1.22 for states at random lateral positions at the same heights.
+The largest distance along either curve is 1.6 units, so the curves are
+close to the recorded activity but not on any one trajectory through it.
+In these rollouts, a four-cluster partition of PC1--PC2 separates the two
+routes as well as the phases, so it is not used here as a measure of phase.
 
-The fixed-point locations also make the direction-dependent robustness
-asymmetry reported above quantitative rather than only descriptive.
-The obstacles sit at $x=4.25$~m and $x=5.75$~m with radius 0.5~m, so the
-left-route fixed point at $x^{*}=3.32$~m leaves roughly 0.43~m of
-clearance from the near obstacle edge.
-A rightward perturbation pushes the agent toward that same near obstacle
-it is already closest to; a leftward perturbation of equal magnitude
-pushes it away, into open space.
-The two fixed points themselves are close to symmetric, in both location
-and relaxation time constant, so the asymmetry is a property of clearance
-relative to a fixed attractor, not of the corrective mechanism itself
-being weaker in one direction.
+Third, push direction relative to the obstacle pair determines failure.
+The two fixed points are close to mirror images, with 0.43~m of clearance
+from the near obstacle edge on the left route and 0.46~m on the right, and
+time constants of 1.42~s and 1.34~s.
+With the route fixed, an impulse toward the obstacle pair fails and the same
+impulse away from it succeeds.
+A rightward impulse of 1.5 failed in 0 of 30 episodes on the left route and
+succeeded in 30 of 30 on the right route; a leftward impulse of the same size
+gave the reverse (30 of 30 and 0 of 30).
+The failure threshold lay between 1.2 and 1.3 on the left route and between
+1.3 and 1.4 on the right route (30 episodes per setting).
+This is consistent with the 0.03~m larger clearance on the right route, but
+the sweep is too coarse to establish it.
+The rightward conditions fail more often than the leftward ones in
+Figure~\ref{fig:attractor}I only because the largest rightward impulse (1.80)
+is more than twice the largest leftward impulse (0.85); at equal magnitude the
+two directions fail equally often when the routes are balanced.
 
 %==============================================================
 \section{Discussion}
@@ -923,14 +937,15 @@ The PPO controller, trained purely by reward, appears to discover the same
 principle implicitly.
 
 The direction-dependent asymmetry in robustness (rightward conditions
-failing at lower magnitudes than leftward) is a geometric consequence of
-the learned trajectory.
+failing at lower magnitudes than leftward) is a consequence of push direction
+relative to the detour route.
+With the route fixed, an impulse toward the obstacle pair fails and one away
+from it succeeds, on either route (Section~\ref{sec:results-attractor}).
+With both detours in use, equal-magnitude rightward and leftward impulses
+fail equally often.
 It is a useful reminder that performance under perturbation is not solely
 a property of the controller; it is a joint property of the controller and
 the specific task geometry in which it operates.
-Future work with symmetric corridors and bidirectional reward shaping
-could establish whether the asymmetry can be removed without sacrificing
-overall performance.
 
 \paragraph{Low-dimensional latent structure and its biological parallel.}
 
@@ -1085,9 +1100,9 @@ representations of the converged policy using the population-level
 toolkit of motor neuroscience.
 
 The controller adapted to moderate perturbations through lateral path
-corrections that preserved movement speed, and its robustness degraded
-asymmetrically under strong rightward disturbances as a consequence of
-the geometry of the learned corridor trajectory.
+corrections that preserved movement speed, and its robustness failed when a
+strong impulse pushed it toward the obstacle pair, whichever detour it was
+following.
 The hidden-layer activity organised into a compact low-dimensional manifold,
 capturing the large majority of population variance in just two principal
 components, with four phase-aligned clusters shared across all perturbation
