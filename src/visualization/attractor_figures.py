@@ -177,12 +177,12 @@ class AttractorFigures:
 
             ax.quiver(
                 X, VX, DX, DVX,
-                color="#B0B0B0",
+                color="#6E6E6E",
                 angles="xy",
                 scale_units="xy",
                 scale=1.0,
                 width=0.003,
-                alpha=0.8,
+                alpha=0.9,
             )
 
             for condition, df in grouped[route]:
