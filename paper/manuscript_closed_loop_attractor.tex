@@ -19,12 +19,12 @@
 \setlength{\parskip}{7pt}
 \linespread{1.15}
 
-\newcommand{\PCAVarI}{78.5\%}
-\newcommand{\PCAVarII}{19.1\%}
-\newcommand{\PCAVarTotal}{97.6\%}
+\newcommand{\PCAVarI}{39.6\%}
+\newcommand{\PCAVarII}{31.1\%}
+\newcommand{\PCAVarTotal}{70.6\%}
 
-\title{\textbf{Obstacle Avoidance Under Perturbation: A Closed-Loop
-Attractor Account of Neural Population Dynamics in Reinforcement Learning}}
+\title{\textbf{The dynamics live in the loop: route-specific lateral equilibria
+of a memoryless controller}}
 
 \author[1]{Peter Ohue}
 \author[1]{Emily Oby}
@@ -44,46 +44,37 @@ Attractor Account of Neural Population Dynamics in Reinforcement Learning}}
 \begin{abstract}
 %--------------------------------------------------------------
 
-Adaptive motor control under unexpected mechanical perturbation requires the
-rapid generation of corrective responses that maintain goal-directed movement
-without disrupting kinematic efficiency.
-Understanding what internal computational signals drive these corrections, and
-what determines whether a controller recovers or fails, remains a fundamental
-challenge in both systems neuroscience and autonomous motor control, in part
-because the relevant signals are not directly accessible from behavioural
-measurements alone.
-We developed a computational framework that places a reinforcement learning
-controller, trained through the same trial-and-error refinement that shapes
-biological motor learning, in a reaching-inspired obstacle-avoidance task and
-challenges it with graded lateral force impulses, mirroring protocols used to
-study feedback correction in human arm movements.
-Rather than reporting only task success, we record the controller's
-hidden-layer activity during evaluation and treat it as a neural population
-signal, applying dimensionality reduction, state-space trajectory analysis,
-and linear decoding to ask what internal representations track behaviour
-and distinguish recovery from failure.
+Unexpected forces can push an ongoing reach toward an obstacle, requiring
+the motor system to correct while preserving progress to the target. We
+asked whether reward-based learning can produce interpretable population
+structure and local stability in a memoryless controller, and whether the
+stabilizing dynamics reside in the policy or in its interaction with physics.
 
-We find that the controller adapts successfully to moderate perturbations
-in both directions but fails once a strong impulse pushes it toward the
-obstacle pair, so robustness depends on the push direction relative to the
-detour route the controller is following.
-The hidden-layer activity organises into a compact low-dimensional manifold,
-with the large majority of population variance captured in just two principal
-components, and subdivides into four discrete clusters that correspond to
-phases of the movement rather than to specific perturbation conditions.
-Lateral velocity is clearly and systematically encoded across the
-population, and the most extreme perturbation conditions produce latent
-states that a simple linear classifier can separate from one another,
-while mild conditions remain geometrically indistinct because they generate
-similar corrective responses.
-These properties closely parallel those documented in motor cortex during
-biological reaching: compact manifold geometry, phase-structured clustering,
-and distributed, linearly readable encoding of kinematic variables.
-Our results suggest that reward-driven optimisation spontaneously generates
-representational organisation that is functionally similar to what has
-been found in biological motor populations, and that population-style
-analyses of artificial controllers can reveal not just whether adaptive
-behaviour succeeds but, mechanistically, why it sometimes does not.
+We trained a feedforward proximal policy optimization (PPO) actor--critic
+for $3\times10^6$ steps to steer a point mass through two obstacles. Its two
+256-unit hidden layers received a 13-dimensional observation that included
+kinematics, task geometry, heading, and an explicit route cue. We analysed
+one hidden layer across 280 episodes (40 per condition, balanced across
+left and right routes) in seven conditions: baseline and three lateral-force
+magnitudes per direction. Fourteen-step impulses began at step 40.
+
+PCA showed that PC1 and PC2 accounted for 39.6\% and 31.1\% of activity
+variance (70.6\% total); trajectories were ordered by movement step and
+separated by route, which was explicitly cued. At $y=5$~m, with forward
+speed fixed and force removed, the reduced lateral policy--physics loop had
+stable, non-oscillatory fixed points at $x^{*}=3.321$~m (left route) and
+6.705~m (right), with relaxation times of 1.42~s and 1.34~s. Mean
+successful crossing positions were 0.11~m and 0.09~m away. Only the
+strongest rightward impulse (1.80) collided: 20/20 left-route episodes;
+all other route-by-condition groups succeeded. Because force magnitudes
+differed across directions, this does not establish directional
+vulnerability. Episode-held-out decoding was 0.11 before and 0.81 after
+the impulse (chance 0.143), showing decodability rather than policy use.
+
+Thus, local stabilization resides in the closed policy--environment loop,
+not recurrent hidden-state dynamics. This one-seed point-mass model is a
+testable computational reference for studying feedback and population
+activity in perturbed reaching, not a neural equivalent.
 
 \end{abstract}
 
@@ -165,32 +156,24 @@ artificially trained controller that was never designed to resemble a
 biological motor system develop similar representational organisation as a
 natural consequence of reward-driven learning?
 
-We train a PPO controller on a two-dimensional obstacle-avoidance reaching
-task and evaluate it under seven graded perturbation conditions spanning
-both directions of lateral displacement, mirroring designs used in human
-perturbation studies.
-During evaluation, we extract the hidden-layer activations of the policy
-network at every timestep and treat the resulting collection as a
-population recording.
-We then apply principal component analysis (PCA) to reveal the geometry
-of the latent state space, examine the relationship between individual
-unit activity and instantaneous lateral velocity, and train linear
-classifiers to test whether perturbation context can be read directly
-from single-timestep population activity.
+We trained a PPO controller on a two-dimensional obstacle-avoidance reaching
+task and evaluated it under seven lateral-force conditions, with left- and
+right-route cues balanced across episodes. At each timestep we extracted
+activity from one hidden layer and analysed it as an artificial
+population-state vector, not as a biological recording. We used PCA,
+clustering, kinematic tuning, and episode-held-out linear decoding to
+characterise its relation to movement and perturbation condition. We then
+analysed the policy coupled to the physics engine to ask whether local
+stability can be identified in the reduced lateral dynamics.
 
-Our contributions are four-fold.
-First, we demonstrate a population-analysis workflow for trained RL
-controllers that enables direct comparison with biological motor data.
-Second, we show that the controller's hidden-layer activity exhibits
-compact low-dimensional manifold structure consistent with neural manifold
-dynamics in motor cortex.
-Third, we show that robustness depends on the push direction relative to the
-active detour: an impulse toward the obstacle pair is far more disruptive
-than one of the same size away from it.
-Fourth, we show that extreme perturbation conditions produce linearly
-separable latent representations while mild ones do not, mirroring the
-difficulty-dependent separability observed in biological neural population
-studies.
+The central result is a distinction between the feedforward policy and its
+closed loop: the hidden layer has no autonomous temporal dynamics, whereas
+the policy--environment system has route-specific, locally stable lateral
+fixed points when forward position and speed are held fixed. This
+complements population-state analyses with a physical-state account of local
+stabilization. Route separation in the activity must be interpreted in light
+of an explicit route cue in the policy observation, and the single-seed,
+point-mass design limits biological inference.
 
 
 %==============================================================
@@ -261,25 +244,25 @@ introduced and training continued until performance plateaued.
 
 \subsection{State Representation}
 
-The agent's observation at each timestep provides a complete description
-of the task-relevant geometry in agent-centred coordinates:
+The agent's observation at each timestep combines physical state, task
+geometry, and the desired route cue:
 \begin{equation}
   s_t = \bigl[
+    x_t,\;y_t,\;v_{x,t},\;v_{y,t},\;
     g_x - x_t,\;g_y - y_t,\;
     o_{Lx} - x_t,\;o_{Ly} - y_t,\;
     o_{Rx} - x_t,\;o_{Ry} - y_t,\;
-    v_{x,t},\;v_{y,t}
+    d_{g,t},\;\theta_t,\;r_t
   \bigr]
   \label{eq:state}
 \end{equation}
-where $(x_t,y_t)$ is the agent's current position, $(v_{x,t},v_{y,t})$
-its current velocity, $(g_x,g_y)$ the goal location, and $(o_L,o_R)$ the
-centres of the left and right obstacles.
-Expressing all spatial quantities relative to the agent rather than in
-absolute workspace coordinates renders the representation invariant to the
-agent's absolute position, which reduces the effective dimensionality of
-the learning problem and encourages the development of generalizable
-movement policies.
+where $(x_t,y_t)$ and $(v_{x,t},v_{y,t})$ are position and velocity,
+$(g_x,g_y)$ is the target-relative coordinate pair, $(o_L,o_R)$ are the
+obstacle centres, $d_{g,t}$ is distance to target, $\theta_t$ is heading,
+and $r_t\in\{-1,+1\}$ specifies the left or right detour. The observation
+is 13-dimensional. Because route identity is provided explicitly,
+separation of routes in hidden activity is not evidence that the policy
+inferred route identity from sensory input alone.
 
 \subsection{Reward Function}
 
@@ -309,21 +292,28 @@ constraint in practice.
 
 To probe the controller's capacity for online correction, we applied
 transient lateral force impulses mid-movement during evaluation.
-The impulse magnitude was held constant for six consecutive timesteps
-beginning at timestep 50:
+The impulse magnitude was held constant for fourteen consecutive timesteps
+beginning at timestep 40:
 \begin{equation}
-  f_x(t) = p_i, \quad t \in [50,\,55], \quad
-  p_i \in \{\pm0.15,\;\pm0.30,\;\pm0.45\}
+  f_x(t) = p_i + \epsilon_t, \quad t \in [40,\,53], \quad
+  \epsilon_t \sim \mathcal{N}(0,\,0.05^2)
   \label{eq:perturbation}
 \end{equation}
 A positive value of $p_i$ corresponds to a rightward impulse; a negative
 value to a leftward impulse.
 This yields seven evaluation conditions: an unperturbed control (P0) and
-three increasing leftward perturbations (L1: $-0.15$, L2: $-0.30$, L3:
-$-0.45$) and three increasing rightward perturbations (R1: $+0.15$, R2:
-$+0.30$, R3: $+0.45$).
-The six-timestep impulse window is brief relative to the typical episode
-duration (approximately 100--120 timesteps), mimicking the short-duration
+three increasing leftward perturbations (L1: $-0.40$, L2: $-0.60$, L3:
+$-0.85$) and three increasing rightward perturbations (R1: $+0.40$, R2:
+$+0.65$, R3: $+1.80$).
+The magnitudes are not evenly spaced.
+R3 is more than twice the size of L3.
+All analyses of the representations and of the closed loop use one set of
+rollouts: the checkpoint saved as \texttt{best\_model}, 40 episodes per
+condition, alternating between the left and right route cue, with a
+fixed random seed.
+The agent's forward speed is capped at 1.0, and episodes last about
+160--170 timesteps.
+The fourteen-timestep window is brief relative to that duration, mimicking the short-duration
 mechanical perturbations applied in biological reaching paradigms to
 isolate online feedback responses from anticipatory motor planning
 \citep{Pruszynski2012,Nashed2014,Dimitriou2013,Todorov2002,Shadmehr1994}.
@@ -425,35 +415,36 @@ scikit-learn.
 \subsection{Dynamical-Systems Framework for the Closed Loop}
 \label{sec:dynsys}
 
-PCA, clustering, and decoding describe \emph{where} the population
-activity sits. They do not say \emph{why} it sits there. To answer that,
-we treat the trained policy and the physics engine together as a single
-closed-loop dynamical system and analyse it with the standard vocabulary
-of dynamical-systems theory. We introduce that vocabulary here, in the
-terms it takes in this specific task, so that the mechanistic claims in
-Section~\ref{sec:results-attractor} can be read without outside
-reference.
+PCA, clustering, and decoding describe hidden-activity geometry; they do
+not identify the physical dynamics that stabilize movement. The actor is
+feedforward, so its hidden activity is a static function of the current
+observation rather than a recurrent state. We therefore analysed the
+policy coupled to the physics engine. The full system advances through the
+corridor and has no stationary fixed point during a reach. For local
+stability analysis, we held forward position and speed fixed, removed the
+external force, and analysed the reduced lateral map
+$(x,v_x)\mapsto(x_{t+1},v_{x,t+1})$ separately for each route cue. The
+equilibria reported below are fixed points of this reduced map at a
+specified forward position, not fixed points of the hidden layer or of the
+full moving reach.
 
 \textbf{State, trajectory, vector field.}
 A dynamical system is a rule for how a state changes over time. Here the
-state is the agent's physical situation: lateral position $x$, forward
-position $y$, lateral velocity $v_x$, forward velocity $v_y$. At every
-timestep the policy reads the state (plus the fixed goal and obstacle
-geometry) and outputs an acceleration; the physics engine integrates that
-acceleration into a new velocity and position. Chaining this over many
-steps produces a \emph{trajectory}, exactly the $(x,y)$ paths already
-plotted in Figure~\ref{fig:trajectories}. The \emph{vector field} is the
-same rule evaluated everywhere at once: at every point in the state
-space, it specifies which direction and how fast the state moves next. A
-trajectory is one path through the vector field; the vector field is the
-full set of paths the system could take from anywhere.
+policy and physics together map the agent's current observation and
+physical state to a new physical state. The complete reach remains in
+motion, so it is not stationary. To examine local lateral stability, we
+fixed forward position $y$ and forward speed at their cruising value,
+specified the route cue, and considered the impulse-free lateral dynamics.
+This defines a reduced two-dimensional map over lateral position $x$ and
+lateral velocity $v_x$. A trajectory through the actual task is not
+identical to a trajectory of this reduced map; the latter isolates local
+lateral correction at one forward position.
 
 \textbf{Fixed points, stability, attractors.}
-A \emph{fixed point} is a state where the vector field is zero: nothing
-changes if the system starts exactly there. In this task, that means zero
-lateral velocity and zero commanded lateral acceleration, the controller
-has stopped correcting sideways and is content to keep going straight up
-the corridor. Whether a fixed point matters behaviourally depends on its
+A \emph{lateral fixed point} is a state unchanged by the reduced map:
+lateral velocity is zero and the commanded lateral acceleration is zero,
+while forward position, forward speed, and route cue are held fixed.
+Whether a fixed point matters behaviourally depends on its
 \emph{stability}. Perturbing the state slightly and linearising the
 vector field around the fixed point yields a matrix, the \emph{Jacobian},
 whose eigenvalues describe what happens next. In discrete time (the
@@ -462,10 +453,10 @@ magnitude below 1 means that direction decays back to the fixed point, an
 \emph{attractor} along that direction; magnitude above 1 means it grows
 away, a \emph{repeller}; a nonzero imaginary part means the decay
 oscillates on the way back in rather than returning in a straight line. A
-fixed point's \emph{basin of attraction} is the set of starting states
-that eventually settle there, and two different attractors can coexist in
-the same system (\emph{multistability}) provided their basins do not
-overlap.
+fixed point's \emph{basin of attraction} is the set of starting lateral
+states that approach it under the same clamped forward position, speed,
+and route cue. These local equilibria should not be interpreted as
+stationary attractors of the entire forward-moving trajectory.
 
 \textbf{Why a feedforward policy still has a closed loop.}
 The classic version of this analysis (Sussillo and Barak, 2013) finds
@@ -476,12 +467,10 @@ in Figure~\ref{fig:pca} is a static function of the instantaneous
 observation, $h_t = g(s_t)$, with no memory of its own previous value, so
 ``the fixed points of the hidden layer'' is not a well-posed question
 here. What \emph{is} well posed, and what we compute instead, is the
-fixed points of the closed loop formed by the policy and the
-environment's physics, in the agent's physical state space. This is a
-legitimate substitute for the recurrent-network case, and is arguably
-more interpretable here, since the state space $(x,y,v_x,v_y)$ already
-carries physical units and meaning, unlike an RNN's abstract hidden
-units.
+fixed points of the policy--environment loop in the reduced lateral
+physical state space. This analysis uses fixed forward position and speed;
+it is not a substitute for fixed-point analysis of a recurrent network and
+does not imply that this feedforward actor has hidden-state dynamics.
 
 %==============================================================
 \section{Results}
@@ -492,53 +481,41 @@ conditions (P0, L1--L3, R1--R3) and report findings in four parts,
 proceeding from observable behaviour to the internal representations that
 underlie it.
 
-Figure~\ref{fig:trajectories} shows cumulative reach trajectories
-overlaid across all seven perturbation conditions.
-In the unperturbed control (P0) and all mild conditions (L1, L2, R1),
-the controller reached the goal on every evaluation trial, generating
-smooth, roughly symmetric paths that arced around both obstacles.
-As perturbation magnitude increased, trajectories deflected progressively
-in the direction of the applied force: leftward conditions (L1--L3) bowed
-the path toward the left obstacle; rightward conditions (R1--R3) bowed it
-toward the right.
+Figure~\ref{fig:trajectories} shows the 280 evaluation trajectories: 40 per
+condition, balanced across the two route cues. The controller reached the
+goal in every route-by-condition group except R3 on the left route, where
+all 20 episodes collided. The corresponding 20 R3 episodes on the right
+route succeeded. All 20 episodes succeeded in each of the other six
+conditions on both routes. Thus, the observed failure is specific to the
+strongest tested rightward impulse on the left route; because leftward and
+rightward force magnitudes were not matched, these data do not establish a
+general directional asymmetry.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.58\linewidth]{fig2_trajectories.png}
-  \caption{\textbf{Cumulative reach trajectories across all seven
-    perturbation conditions illustrating the limits of adaptive correction.}
-    Each evaluation episode is overlaid separately for each condition.
+  \caption{\textbf{Reach trajectories across the seven perturbation
+    conditions and two route cues.}
+    Each evaluation episode is overlaid separately for each condition and
+    route cue (20 episodes per route and condition).
     Solid lines are successful trials that reached the goal; the dashed
     red lines are failure trajectories that ended in obstacle collision.
     Leftward perturbation conditions (L1--L3, mauve/pink tones) progressively
     deflect the path toward the left obstacle, while rightward conditions
     (R1--R3, teal/dark green) deflect it toward the right.
-    The shaded green horizontal band marks the region of the workspace in
-    which the lateral force impulse is active (timesteps 50--55), providing
-    a reference for when in the movement the perturbation is applied.
+    The shaded band marks the workspace region corresponding to the
+    14-step impulse beginning at step 40.
     Grey ellipses represent the two static obstacles forming the corridor.
-    The controller maintained complete goal success under control and all
-    mild conditions; success declined only under the two strongest rightward
-    disturbances and under the largest leftward impulse, with rightward
-    perturbations proving disproportionately disruptive on the left detour
-    that every plotted episode followed, because a rightward push drives the
-    agent toward the obstacle pair.}
+    All route-by-condition groups succeeded in 20/20 episodes except the
+    strongest rightward condition (R3) on the left route, which collided in
+    20/20 episodes. R3 succeeded in 20/20 episodes on the right route.}
   \label{fig:trajectories}
 \end{figure}
 
-Goal success declined only at the two strongest rightward magnitudes
-(R2 and R3) and at the largest leftward magnitude (L3).
-Notably, rightward perturbations were more disruptive than leftward ones
-of the same nominal force.
-Every episode in this evaluation took the left detour, and on that detour a
-rightward push drives the agent toward the obstacle pair while a leftward
-push carries it away from them into open space.
-The asymmetry is therefore a property of push direction relative to the
-route, not of the corrective mechanism being weaker in one direction;
-Section~\ref{sec:results-attractor} tests this with both routes in use.
-Across all successful trials, peak speed was effectively constant across
-conditions; adaptation was expressed entirely through lateral path geometry,
-not through modulation of movement tempo.
+The data establish robustness across the tested conditions and routes, with
+one specific failure group. The left- and rightward force magnitudes are
+unequal, however, so comparing their outcomes cannot isolate a causal
+effect of perturbation direction or obstacle clearance.
 
 Figure~\ref{fig:velocity} characterises the temporal evolution of
 lateral velocity and total speed across all seven conditions.
@@ -546,60 +523,35 @@ lateral velocity and total speed across all seven conditions.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.80\linewidth]{fig3_velocity.png}
-  \caption{\textbf{Velocity profiles reveal proportional perturbation
-    encoding and preserved movement tempo.}
+  \caption{\textbf{Lateral velocity and speed profiles during
+    perturbation.}
     \textbf{(I)}~Mean lateral velocity, expressed as a deviation from the
     unperturbed (P0) trajectory ($\Delta v_x$), over time, aligned to
     movement onset and averaged across all episodes within each condition.
     Shaded regions show $\pm$1\,SD, conveying trial-to-trial variability.
     We plot the deviation from P0 rather than raw lateral velocity because
-    every saved episode takes the same left-detour route, so even the
-    unperturbed trajectory has substantial negative lateral velocity in
-    this window; subtracting it isolates the perturbation response itself.
+    route is accounted for when comparing perturbed and unperturbed
+    trajectories; subtracting the baseline isolates the perturbation
+    response from the route-specific movement pattern.
     Leftward conditions (L1--L3) push $\Delta v_x$ negative, while
-    rightward conditions (R1--R3) push it positive, exactly during the
-    perturbation window (timesteps 50--55, indicated by the shaded band).
-    Immediately afterward, both directions swing past zero into a larger
-    corrective overshoot of the opposite sign before relaxing back toward
-    the unperturbed trajectory, consistent with a proportional corrective
-    response rather than a stereotyped binary reaction. Critically, the
-    magnitude of the initial deflection scales with perturbation strength
-    within each direction, suggesting a graded, analogue corrective
-    mechanism.
+    rightward conditions (R1--R3) push it positive during the perturbation
+    window (steps 40--53, indicated by the shaded band).
+    After the impulse, lateral velocity returns toward the corresponding
+    route-specific baseline. These profiles describe the kinematic response
+    and do not by themselves establish a proportional feedback law.
     \textbf{(II)}~Total speed (Euclidean norm of the velocity vector)
     plotted as a function of normalised movement phase (0 = movement onset,
-    100 = goal arrival). Speed rises steeply at movement onset, reaching
-    a plateau that is maintained consistently across all seven perturbation
-    conditions. This invariance of the speed profile confirms that the
-    controller's response to lateral perturbations is expressed entirely
-    through changes in movement direction rather than through changes in
-    the overall pace of the movement, a dissociation that mirrors the
-    kinematic signature of online feedback corrections in human arm
-    movements \citep{Pruszynski2012,Nashed2014,FlashHogan1985}.}
+    100 = goal arrival). Shading shows trial-to-trial variability.}
   \label{fig:velocity}
 \end{figure}
 
-Panel~I shows that the deviation in lateral velocity from the unperturbed
-trajectory separated cleanly and systematically by perturbation direction
-during the active perturbation window. Leftward conditions pushed
-$\Delta v_x$ negative; rightward conditions pushed it positive; and in
-both directions the magnitude of the initial deflection scaled with
-perturbation strength. Immediately after the perturbation window,
-conditions on both sides swung past zero into a corrective overshoot of
-the opposite sign before relaxing back toward the unperturbed trajectory,
-a signature that the controller is generating a corrective force
-proportional to the sensed displacement rather than a binary switch
-between pre-programmed response modes.
-
-Panel~II confirms that total movement speed was essentially invariant
-across all seven conditions.
-The controller increases speed rapidly at movement onset, reaches a plateau,
-and maintains that plateau uniformly regardless of whether a perturbation is
-applied or its magnitude and direction.
-This dissociation between path geometry (which is modulated by
-perturbation) and speed profile (which is not) is a hallmark of optimal
-feedback control strategies in biological reaching
-\citep{Todorov2002,Scott2004}.
+Panel~I shows the change in lateral velocity relative to the unperturbed
+trajectory during and after the impulse. This describes the kinematic
+response in the simulated task; it does not by itself identify a
+biological feedback mechanism. Panel~II shows total speed over movement
+phase. We use these profiles descriptively and do not infer a general
+separation between lateral correction and movement tempo from this
+single-seed evaluation.
 
 Figure~\ref{fig:pca} shows the result of projecting the full 256-dimensional
 hidden-layer activity onto its first two principal components across all
@@ -608,77 +560,44 @@ evaluation timesteps.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.88\linewidth]{fig4_pca.png}
-  \caption{\textbf{Hidden-layer activity occupies a compact low-dimensional
-    manifold with structure aligned to movement phases rather than to
-    perturbation conditions.}
+  \caption{\textbf{Hidden-layer activity occupies a low-dimensional
+    manifold ordered by movement phase.}
     Each point represents the 256-dimensional hidden-state vector at one
-    evaluation timestep, projected onto the first two principal components
-    of the entire evaluation dataset.
-    \textbf{(I)}~Points are coloured by perturbation condition (see
-    legend). The population activity traces a characteristic curved
-    manifold whose gross shape is shared across all seven conditions.
-    Conditions are not cleanly separated (they overlap substantially)
-    but extreme conditions (particularly L3 and R3) occupy peripheral
-    regions of the manifold that are partly distinct from the control
-    and mild conditions.
-    PC1 accounts for \PCAVarI{} of total variance, PC2 for \PCAVarII{};
-    together they capture \PCAVarTotal{} of the variance in a
-    256-dimensional network, demonstrating a high degree of dimensionality
-    compression.
-    \textbf{(II)}~The same projection coloured by $K$-means cluster label
-    ($K=4$). Four spatially coherent clusters emerge that partition the
-    manifold into anatomically distinct regions. These clusters are not
-    condition-specific: each cluster contains timesteps from all seven
-    perturbation conditions. Instead, the clusters likely correspond to
-    phases of the reaching movement that are shared across conditions:
-    for example, the initial approach to the perturbation zone
-    (cluster~1), the active perturbation and correction epoch
-    (cluster~2), the path around the obstacles (cluster~3), and the
-    final approach to the goal (cluster~4). This phase-aligned structure
-    closely resembles the sequential activation of distinct neural
-    population states that has been documented in motor cortex during
-    biological reaching movements \citep{Churchland2012,Shenoy2013}.}
+    timestep of the rollouts, projected onto the first two principal
+    components of the full rollout set (40 episodes per condition).
+    \textbf{(I)}~Points are coloured by perturbation condition. Activity
+    separates by detour route; the route cue is an explicit component of the
+    policy observation. Within each route, trajectories show condition-
+    dependent variation after the impulse.
+    PC1 accounts for \PCAVarI{} of the variance and PC2 for \PCAVarII{},
+    \PCAVarTotal{} in total.
+    \textbf{(II)}~The same projection coloured by step. Activity moves
+    along each branch from the start (dark) to the goal (light).}
   \label{fig:pca}
 \end{figure}
 
-Two findings emerge from this analysis.
-The first is the degree of dimensionality compression.
-Despite the policy network having 256 hidden units in its first layer,
-\PCAVarTotal{} of the variance in the activation patterns collapses onto
-just two dimensions.\footnote{An earlier conference abstract and the
-associated grant proposal reported a lower figure (74.8\%, PC1 46.8\%,
-PC2 28.0\%) from a preliminary analysis run whose raw per-episode
-activations are no longer available for re-verification. The value
-reported here is computed directly from the evaluation data archived in
-this repository (\texttt{experiments/version\_1\_0}) and is the one that
-should be cited going forward.}
-This is a striking degree of compression, comparable in magnitude to
-the low-dimensional manifold structure reported for motor cortex activity
-during reaching in both non-human primates and humans
-\citep{Churchland2012,Shenoy2013,Cunningham2014,Gallego2017,Sadtler2014,Elsayed2016}.
-In both biological and artificial cases, the compression is not imposed
-externally; it emerges from the structure of the learning problem itself.
-When a system must produce a sequence of smooth, goal-directed movements,
-the activity patterns across trials are necessarily correlated, and a
-small number of principal directions can capture most of that shared
-structure.
+Two principal components account for \PCAVarTotal{} of the variance in the
+analysed 256-unit layer (PC1: \PCAVarI{}; PC2: \PCAVarII{}). This is a
+compact description of activity in these rollouts, but it does not establish
+that the network learned a biological-style neural manifold. The task
+repeatedly samples a restricted set of movement states, and route is
+explicitly specified in the observation; both factors can contribute to the
+observed geometry. Low-dimensional population structure is also reported in
+motor-cortical reaching data
+\citep{Churchland2012,Shenoy2013,Cunningham2014,Gallego2017,Sadtler2014,Elsayed2016},
+providing a useful organizational comparison rather than evidence of
+equivalent mechanisms.
 
-The second finding is the cluster organisation.
-The $K$-means analysis with $K=4$ reveals four spatially coherent clusters
-within the manifold.
-These clusters do not separate perturbation conditions from one another;
-rather, each cluster draws timesteps from all seven conditions.
-This indicates that the clusters reflect something about the movement itself,
-most likely its phase, rather than about the perturbation that is currently
-acting.
-This phase-aligned clustering parallels findings from motor cortex
-recordings in biological reaching, where distinct neural population states
-have been identified for the preparatory, movement initiation, and
-movement completion epochs \citep{Churchland2012,Shenoy2013,Kaufman2014,Perich2018}.
-We note that the choice of $K=4$ was not cross-validated; future work
-with held-out datasets and multiple training seeds would be needed to
-establish whether the four-cluster solution is a stable feature of the
-representation.
+Activity also varied systematically with route and movement step. The route
+cue was perfectly decodable (held-out accuracy 1.00; chance 0.50), as
+expected for an explicit input. Exploratory $K$-means clustering ($K=4$)
+within each route produced clusters ordered over movement time. Their
+condition composition was broadly similar, although later clusters on the
+left route were affected by early termination of R3 collisions. The choice
+of $K$ was not cross-validated, and clustering was not repeated across
+training seeds. We therefore treat this phase ordering as descriptive,
+not as evidence for discrete biological population states
+\citep{Churchland2012,Shenoy2013,Kaufman2014,Perich2018}.
 
 Figure~\ref{fig:decoding} shows the confusion matrix from a linear
 classifier trained on single-timestep hidden-layer activity to identify
@@ -687,57 +606,31 @@ the perturbation condition active on each trial.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.56\linewidth]{fig5_decoding.png}
-  \caption{\textbf{Linear decoding reveals that extreme perturbation
-    conditions produce geometrically distinct population states, while
-    mild conditions remain indistinguishable.}
-    Rows of the confusion matrix correspond to the true perturbation
-    condition for each timestep; columns correspond to the condition
-    predicted by a multinomial logistic regression classifier trained on
-    the 256-dimensional hidden-layer activation vector at that timestep.
-    Diagonal entries indicate the proportion of
-    timesteps from each true condition that were correctly classified.
-    Importantly, the off-diagonal pattern reveals that misclassified
-    timesteps are not randomly distributed: mild and control conditions
-    (P0, L1, L2) are almost exclusively misclassified as L3 (the largest
-    leftward perturbation), rather than being confused with rightward
-    conditions. This systematic misclassification indicates that the
-    latent states generated by mild perturbations are geometrically closer
-    to the L3 region of the manifold than to any other condition,
-    suggesting that similar corrective responses, regardless of the
-    magnitude of the perturbation that elicited them, occupy similar
-    regions of the latent space. The decoder's successful separation of
-    extreme conditions (L3 and R3 achieved the highest diagonal values)
-    confirms that the most behaviourally disruptive perturbations
-    produce the most distinctive internal representations.}
+  \caption{\textbf{A linear decoder identifies the perturbation condition
+    after the impulse, not before it.}
+    Rows are the true condition and columns the condition predicted by a
+    multinomial logistic regression on the 256-dimensional hidden-layer
+    vector at one timestep. Entries are row-normalised.
+    Accuracy was estimated with five-fold episode-held-out
+    cross-validation. The matrix shows timesteps after the impulse
+    (steps 54--100, accuracy 0.81, seven-class chance 0.143).
+    Before the impulse (steps 0--39), accuracy was 0.11, near chance.
+    Errors fall mostly between neighbouring magnitudes on the same side
+    (L1 as L2, R1 as R2).}
   \label{fig:decoding}
 \end{figure}
 
-The classifier achieved its highest accuracy for the most extreme
-perturbation conditions: the largest leftward impulse (L3) was correctly
-identified on the majority of timesteps, and the largest rightward impulse
-(R3) was correctly classified at a similarly high rate.
-Moderate rightward conditions (R1, R2) were also decoded above chance.
-The unperturbed control and mild leftward conditions (P0, L1, L2) were
-decoded at near-chance levels, and when misclassified, they were
-systematically assigned to L3 rather than to random conditions.
-This is not a simple failure of the classifier; it is a feature of the
-latent geometry.
-Mild perturbations generate hidden states that occupy a region of the
-manifold geometrically close to the L3 cluster, reflecting the fact that
-mild corrections and large corrections that are ultimately successful
-produce similar downstream activity.
-What distinguishes them is the trajectory they took through the state
-space to get there, not their momentary position.
-
-The fact that a linear classifier can decode extreme conditions at all is
-the more important result.
-Perturbation context is encoded in the population activity in a structured,
-geometrically accessible form: the relevant information is present in a
-linear projection of the 256-dimensional activity vector.
-This mirrors the finding from biological motor neuroscience that
-target direction, perturbation magnitude, and trial outcome can all be
-decoded with linear classifiers trained on motor cortex population activity
-\citep{Churchland2012,Nashed2014,Oby2019,Georgopoulos1986,Sadtler2014}.
+In episode-held-out cross-validation, perturbation condition was decoded at
+0.11 accuracy before the impulse and 0.81 after it (chance 0.143 for seven
+classes). This establishes that condition-related information is linearly
+readable from the activity after the impulse. It does not show that the
+policy uses this information to select its action. Because the actor is
+memoryless and its observation contains current kinematics and task context,
+the decoder may be reading state changes caused by the impulse rather than
+a stored representation of perturbation history. Linear decoding is used
+in motor-cortical population analyses as well
+\citep{Churchland2012,Nashed2014,Oby2019,Georgopoulos1986,Sadtler2014};
+the interpretation here is limited to this controller and task.
 
 Figure~\ref{fig:learning} contextualises the representational findings
 within the training dynamics of the controller.
@@ -745,97 +638,72 @@ within the training dynamics of the controller.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{fig6_learning.png}
-  \caption{\textbf{The controller converges stably, validating the
-    representational analyses as properties of a fully trained policy.}
-    \textbf{(Left panel)}~Evaluation reward plotted across independently
-    sampled checkpoints throughout training (mean $\pm$\,SD across all
-    evaluation episodes at each checkpoint). The reward is tightly
-    clustered around a high value once training has converged,
-    demonstrating that performance is stable rather than oscillating, and
-    that the policy extracted from any checkpoint after convergence will
-    yield similar behaviour.
-    \textbf{(Right panel)}~Raw per-episode rollout reward over the full
-    $3\times10^6$-timestep training run (light blue), together with an
-    exponential moving average (red) to reveal the learning trajectory.
-    The policy improves rapidly from large negative initial rewards
-    (reflecting early episodes in which the agent collides frequently)
-    to a stable positive plateau within approximately the first
-    $1\times10^6$ timesteps, after which performance remains stable
-    without systematic degradation or catastrophic forgetting.
-    The representations analysed in Figures~\ref{fig:pca}
-    and~\ref{fig:decoding} were extracted from the converged policy
-    (after $2\times10^6$ timesteps), ensuring that they reflect the
-    learned representational structure rather than an artefact of
-    incomplete training.}
+  \caption{\textbf{Training performance and the checkpoint used for
+    analysis.}
+    \textbf{(Left panel)}~Evaluation reward across sampled checkpoints
+    (mean $\pm$\,SD across evaluation episodes).
+    \textbf{(Right panel)}~Per-episode training reward over the
+    $3\times10^6$-step run (light blue) and its exponential moving average
+    (red). All population and fixed-point analyses use the saved
+    best-evaluation checkpoint, which corresponds to 800,000 training
+    steps.}
   \label{fig:learning}
 \end{figure}
 
 \FloatBarrier
 
-The training curve confirms that the controller learned the task efficiently
-and converged to a stable solution within the first third of the training
-budget.
-After convergence, performance was tightly distributed across independently
-sampled evaluation checkpoints, ruling out the possibility that the reported
-behavioural and representational findings are artefacts of partial training
-or of checkpoint selection.
-The rapid initial improvement followed by a long stable plateau is
-characteristic of well-tuned PPO training on continuous-control problems
-and is consistent with the training dynamics reported for similar
-obstacle-avoidance and reaching tasks in the RL literature
-\citep{Raffin2021StableBaselines3,Schulman2017}.
+The best-evaluation checkpoint was saved at 800,000 steps and is the
+checkpoint used for the reported rollouts and population analyses. A
+separate fixed-point sensitivity analysis across eight saved checkpoints
+showed appreciable variation in equilibrium locations and relaxation
+times. The results should therefore be read as a characterization of this
+selected policy, not as a checkpoint-invariant property of PPO training.
 
 The clustering and decoding results in Figures~\ref{fig:pca}
-and~\ref{fig:decoding} describe where the population activity sits.
-They do not say why it sits there.
+and~\ref{fig:decoding} describe hidden-activity geometry. To examine local
+physical stability, we analysed the policy--physics loop with forward
+position and forward speed held fixed and the external impulse removed.
 \label{sec:results-attractor}
-To answer that, we treated the policy and the physics engine together as
-a single closed-loop system, using the dynamical-systems framework
-introduced in Section~\ref{sec:dynsys}: at every step the policy reads
-the agent's state and outputs an acceleration, the physics engine
-integrates it, and the resulting state is fed back in.
-With the perturbation off, this closed loop is autonomous in the agent's
-physical state $(x, y, v_x, v_y)$, so its fixed points and their
-stability can be computed directly.
-
-The policy also conditions on a discrete route cue that determines which
-side of the obstacle pair the agent detours around.
-In the rollouts behind Figure~\ref{fig:attractor} the cue alternated between
-episodes, so both detours are observed: 140 episodes per route, 20 for each
-of the seven conditions on each route, run with one checkpoint (the
-best-evaluation checkpoint) and one training seed.
-Impulses lasted 14 timesteps from step 40 and had magnitudes of 0.40, 0.60,
-and 0.85 (leftward) and 0.40, 0.65, and 1.80 (rightward), plus Gaussian
-jitter with a standard deviation of 0.05.
-These settings differ from the protocol in Section~\ref{sec:methods-perturbation}.
-We solved for the fixed point of the reduced lateral subsystem $(x, v_x)$ at
-$y=5.0$~m separately for each route.
+The actor has no recurrent hidden state, so the fixed points are not
+equilibria of hidden activity. We evaluated 280 episodes from the
+best-evaluation checkpoint (800,000 training steps): 140 episodes per route,
+with 20 episodes per condition on each route, from one training seed and
+one evaluation seed. The force protocol is as specified in
+Section~\ref{sec:methods-perturbation}; in particular, leftward magnitudes
+were 0.40, 0.60, and 0.85, whereas rightward magnitudes were 0.40, 0.65,
+and 1.80. The directions therefore do not provide matched-magnitude
+comparisons. We solved for fixed points of the reduced lateral map
+$(x,v_x)\mapsto(x_{t+1},v_{x,t+1})$ at $y=5.0$~m, separately for each
+route cue, with forward speed fixed at its measured plateau and the
+external force set to zero.
 Both fixed points are locally stable, with two real eigenvalues below 1 in
 magnitude and no imaginary component, so close to the fixed point the
 lateral state relaxes back smoothly rather than oscillating.
-The left-route fixed point sits at $x^{*}=3.32$~m with a relaxation time
-constant of 1.42~s; the right-route fixed point sits at $x^{*}=6.71$~m
+The left-route fixed point sits at $x^{*}=3.321$~m with a relaxation time
+constant of 1.42~s; the right-route fixed point sits at $x^{*}=6.705$~m
 with a time constant of 1.34~s, close to a mirror image of the left about
 the corridor midline at $x=5.0$~m.
 Episodes that completed the detour crossed $y=5.0$~m at
 $3.43\pm0.03$~m on the left route ($n=120$) and $6.62\pm0.05$~m on the
 right route ($n=140$), which is 0.11~m and 0.09~m from the fixed points.
-These values depend on the checkpoint: the final checkpoint gives
-$x^{*}=3.62$~m and $6.47$~m with time constants of 0.64~s and 1.16~s, which
-are not close to mirror images.
+Across the eight saved checkpoints, fixed-point locations ranged from
+3.23--3.62~m on the left route and 6.40--6.79~m on the right; relaxation
+times ranged from 0.55--1.42~s and 0.76--1.34~s, respectively. The values
+above therefore describe the selected checkpoint, not a checkpoint-
+invariant property of training.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\linewidth]{figures/fig_composite_obstacle_avoidance_mechanism.png}
-  \caption{\textbf{A closed-loop fixed-point analysis recovers the detour the
-    controller follows, and failure depends on push direction.}
+  \caption{\textbf{Reduced lateral fixed points, executed paths, and
+    population activity in the policy--physics loop.}
     \textbf{(I)}~Reach trajectories for all seven conditions (colour) on
     both detour routes. Dashed lines and crosses mark collisions. The grey
     band is the span of heights at which the impulse acts (median over
     control episodes, steps 40--53). Stars mark the closed-loop fixed points
     at $y=5.0$~m.
     \textbf{(II)}~PC1--PC2 of hidden-layer activity from the same rollouts,
-    coloured by step. The components are recomputed on these rollouts (70.7\%
+    coloured by step. The components are recomputed on these rollouts (70.6\%
     of variance in two components) so that the fixed-point states are
     projected through the same checkpoint that produced the activity. Black
     curves are the fixed-point states $x^{*}(y)$ for the left (solid) and
@@ -845,20 +713,23 @@ are not close to mirror images.
     crossing with a negative slope, which is the fixed point. The commanded
     acceleration saturates at $\pm1$. Ticks along the bottom mark where
     completed episodes crossed $y=5.0$~m. Collisions occurred only for the
-    largest rightward impulse on the left route (20 of 20 episodes).}
+    largest tested rightward impulse on the left route (20 of 20 episodes).
+    The plotted fixed-point curve is a set of local equilibria at fixed
+    forward positions, not a trajectory that the agent follows exactly.}
   \label{fig:attractor}
 \end{figure}
 
 \FloatBarrier
 
-The fixed points relate to the behavioural results in three ways.
-First, they locate the detour. The lateral position at which completed
-episodes cross the obstacle band is within about 0.1~m of the fixed point,
-so the preferred detour can be read from the closed loop without reference
-to the trajectories.
-This match is local to the obstacle band. At other heights the agent is still
-moving toward or away from the detour, and the fixed-point path differs from
-the observed path by up to 1.7~m at $y=1.5$~m.
+The fixed points relate to the behavioural results locally, at the obstacle
+band. The mean crossing position is within approximately 0.1~m of the
+corresponding fixed point, but the equilibria do not track the complete
+executed trajectory. Across $y=1.5$--$8.5$~m, the median absolute
+fixed-point-to-mean-path difference was 0.63~m on the left route and
+0.48~m on the right; the maximum differences were 1.67~m and 1.69~m.
+This is consistent with a local stabilization interpretation at the sampled
+forward position, not with a moving equilibrium that the reach follows
+throughout.
 Second, the fixed-point states lie within the region of recorded activity.
 The median distance from a fixed-point state to the nearest recorded point in
 PC1--PC2 is 0.35 units on the left route and 0.46 on the right, against 0.92
@@ -868,188 +739,104 @@ close to the recorded activity but not on any one trajectory through it.
 In these rollouts, a four-cluster partition of PC1--PC2 separates the two
 routes as well as the phases, so it is not used here as a measure of phase.
 
-Third, push direction relative to the obstacle pair determines failure.
-The two fixed points are close to mirror images, with 0.43~m of clearance
-from the near obstacle edge on the left route and 0.46~m on the right, and
-time constants of 1.42~s and 1.34~s.
-With the route fixed, an impulse toward the obstacle pair fails and the same
-impulse away from it succeeds.
-A rightward impulse of 1.5 failed in 0 of 30 episodes on the left route and
-succeeded in 30 of 30 on the right route; a leftward impulse of the same size
-gave the reverse (30 of 30 and 0 of 30).
-The failure threshold lay between 1.2 and 1.3 on the left route and between
-1.3 and 1.4 on the right route (30 episodes per setting).
-This is consistent with the 0.03~m larger clearance on the right route, but
-the sweep is too coarse to establish it.
-The rightward conditions fail more often than the leftward ones in
-Figure~\ref{fig:attractor}I only because the largest rightward impulse (1.80)
-is more than twice the largest leftward impulse (0.85); at equal magnitude the
-two directions fail equally often when the routes are balanced.
+The two fixed points are approximately symmetric in lateral position, but
+the evaluation does not isolate the effect of force direction: the tested
+rightward and leftward magnitudes are not matched, and the only observed
+failure occurred for R3 on the left route. The data therefore do not
+support a general claim that the controller is more vulnerable to one
+direction, nor a prediction that vulnerability reverses on the other route.
 
 %==============================================================
 \section{Discussion}
 %==============================================================
 
-This study asked whether a controller trained by reinforcement learning
-to perform adaptive obstacle avoidance develops internal representations
-that are interpretable using the analytical framework of systems motor
-neuroscience.
-We find consistent evidence that it does: the hidden-layer activity of
-a converged PPO policy organises into a compact low-dimensional manifold
-with phase-aligned cluster structure, encodes kinematic variables in a
-distributed, graded way, and contains linearly readable information about
-perturbation context that is most distinct for the most behaviourally
-demanding conditions.
-We discuss these findings in relation to biological motor control,
-consider what they reveal about the controller's failure modes, and
-acknowledge the limitations that bound their generality.
+We asked how a reward-trained, memoryless controller responds to lateral
+perturbations and whether its population activity and physical closed loop
+offer complementary descriptions of that response. The analysed checkpoint
+showed low-dimensional hidden activity, route-specific local lateral
+equilibria, and post-impulse condition decodability. These findings are
+descriptive and specific to one training run, checkpoint, and point-mass
+task; they provide an organizational comparison with motor neuroscience,
+not evidence of neural equivalence.
 
-\paragraph{Behavioural adaptation mirrors biological feedback correction.}
+\paragraph{Behaviour and feedback correction.}
 
-The pattern of behavioural adaptation, characterised by robust performance
-under mild perturbations, progressive degradation under stronger ones, and
-adaptation expressed through path correction rather than speed modulation,
-is qualitatively consistent with the kinematic signatures of online feedback
-corrections in human reaching.
-In biological reaching, the primary motor cortex and premotor areas
-generate rapid, graded corrective responses to unexpected force perturbations
-that reshape the movement path without systematically altering movement
-speed \citep{Pruszynski2012,Nashed2014,FlashHogan1985,Scott2004,Dimitriou2013,Shadmehr1994,Diedrichsen2010}.
-The PPO controller exhibits precisely this dissociation: it modulates
-path geometry in proportion to the applied force while keeping the overall
-movement tempo constant across all seven conditions (Figure~\ref{fig:velocity}II).
+Across the 280 evaluation episodes, only one route-by-condition group
+failed: all 20 left-route trials with the strongest tested rightward impulse
+collided, while the corresponding right-route trials succeeded. The impulse
+magnitudes were not matched across directions, so this result does not
+establish a general directional asymmetry. It identifies a specific
+failure mode of this checkpoint under this task geometry.
 
-We are careful not to overstate this correspondence.
-The point-mass dynamics are far simpler than those of a biological limb;
-the controller has no muscle mechanics, no proprioceptive noise, and no
-time delays in sensory feedback.
-The PPO policy was optimised for cumulative reward, not for kinematic
-smoothness or biological realism.
-Nevertheless, the convergence of the kinematic signature of proportional
-lateral deflection with preserved speed is consistent with the computational
-principles of optimal feedback control (OFC), which predicts that
-well-adapted controllers should correct task-relevant errors while
-leaving task-irrelevant variables unchanged \citep{Todorov2002,Todorov2009,Franklin2011,WolpertGhahramani2000}.
-Under OFC, speed is a task-irrelevant variable when a lateral perturbation
-is applied; correcting it would waste motor resources without improving
-goal attainment.
-The PPO controller, trained purely by reward, appears to discover the same
-principle implicitly.
+In biological reaching, unexpected forces evoke graded online corrections
+that reshape the movement while progress toward the target continues
+\citep{Pruszynski2012,Nashed2014,FlashHogan1985,Scott2004,Dimitriou2013,Shadmehr1994,Diedrichsen2010}.
+The present model offers a simple setting in which to study how sensory
+state, action, and physical feedback interact during such corrections.
+However, a point mass controlled by a feedforward policy lacks muscle
+mechanics, sensory noise, neural delays, and recurrent memory. Similarities
+in behavioural organization therefore motivate comparison with biological
+reaching; they do not establish shared neural mechanisms.
 
-The direction-dependent asymmetry in robustness (rightward conditions
-failing at lower magnitudes than leftward) is a consequence of push direction
-relative to the detour route.
-With the route fixed, an impulse toward the obstacle pair fails and one away
-from it succeeds, on either route (Section~\ref{sec:results-attractor}).
-With both detours in use, equal-magnitude rightward and leftward impulses
-fail equally often.
-It is a useful reminder that performance under perturbation is not solely
-a property of the controller; it is a joint property of the controller and
-the specific task geometry in which it operates.
+\paragraph{Population-state geometry.}
 
-\paragraph{Low-dimensional latent structure and its biological parallel.}
+Two principal components explained 70.6\% of the variance in the analysed
+256-unit layer. This describes the activity sampled in these rollouts; it
+does not show that reinforcement learning alone created a neural-like
+manifold. The task samples a restricted set of states, and the observation
+includes an explicit route cue, both of which can contribute to the
+low-dimensional structure. Motor-cortical reaching studies report
+low-dimensional population activity
+\citep{Churchland2012,Shenoy2013,Cunningham2014,Gallego2017}, providing an
+organizational point of comparison rather than evidence of equivalence.
 
-The finding that \PCAVarTotal{} of the variance in a 256-unit network
-collapses onto two dimensions is the most theoretically significant result
-of this study, because it was not imposed by the network architecture.
-The MLP has no bottleneck layer, no regularisation that explicitly
-penalises high-dimensional representations, and no biological constraints.
-Yet the activity self-organises into a highly compressed subspace.
-
-The same phenomenon has been documented repeatedly in motor cortex.
-Recordings from hundreds of neurons during reaching show that most of the
-variance in the neural activity lives in a subspace of far lower dimension
-than the number of recorded cells
-\citep{Churchland2012,Shenoy2013,Cunningham2014,Gallego2017}.
-The interpretation offered in the biological literature is that the
-repetitive, structured nature of movement, which proceeds through a
-stereotyped sequence of phases regardless of specific kinematics, forces
-the neural population into a low-dimensional orbit through activity space.
-Our results suggest that the same logic applies to artificial controllers:
-because all reaching movements share a common temporal structure
-(acceleration, obstacle passage, deceleration toward goal), the hidden
-states across all trials are necessarily correlated, and a small number
-of principal components suffice to capture that shared structure.
-
-The four-cluster decomposition of the manifold (Figure~\ref{fig:pca}II)
-provides a complementary view.
-The clusters partition the manifold spatially, and because they do not
-separate perturbation conditions they most naturally correspond to movement
-phases: the approach to the perturbation zone, the active perturbation
-and correction epoch, the passage around the obstacles, and the final
-approach to goal.
-This phase-aligned clustering is consistent with the sequential activation
-of distinct neural population states documented in motor cortex during
-biological reaching \citep{Churchland2012,Shenoy2013,Kaufman2014,Elsayed2016,Georgopoulos1986}.
-We again note that the choice of $K=4$ was not cross-validated; the number
-of clusters and their boundaries could shift across training seeds or
-evaluation datasets.
+Exploratory $K$-means clustering with $K=4$ produced clusters ordered over
+movement step within each route. The choice of $K$ was not cross-validated,
+and these results come from one training seed. We regard the apparent
+phase ordering as descriptive rather than evidence for discrete neural
+states \citep{Churchland2012,Shenoy2013,Kaufman2014,Elsayed2016,Georgopoulos1986}.
 
 \paragraph{What the decoder tells us about internal organisation.}
 
-The systematic pattern of decoder performance, which was accurate for
-extreme conditions and near-chance for mild ones, with mild conditions
-systematically misclassified as L3 rather than as random conditions,
-carries a specific message about the geometry of the latent space.
-It means that the hidden states generated by mild perturbations, while
-physically distinct in the external world, produce internal
-representations that are more similar to those generated by large
-perturbations than to those generated by the control condition.
-This is ecologically sensible: a small perturbation that the controller
-handles with a small correction generates a hidden state trajectory that
-passes close to the L3 region of the manifold, because a large
-perturbation that the controller handles well with a large correction
-passes through the same region.
-The relevant variable that separates these cases is not the instantaneous
-manifold position but the magnitude of the preceding displacement and
-corrective force; this information is carried in the trajectory through
-state space rather than in any single point.
-
-This interpretation has a direct parallel in biological motor
-neuroscience.
-Studies of motor cortex activity during online reaching corrections show
-that the decodability of perturbation magnitude improves substantially
-when the decoder is given a temporal window of population activity rather
-than a single snapshot \citep{Nashed2014,Churchland2012,Sadtler2014,Perich2018}.
-The same principle likely applies here: the latent state at any single
-timestep is not a sufficient summary of the perturbation history, but the
-sequence of latent states over the correction epoch likely is.
-Future work with recurrent or temporal decoding approaches could test this
-directly.
+The episode-held-out decoder distinguished perturbation condition after
+the impulse, but not before it. This is state decoding, not evidence that a
+memoryless policy stores perturbation history or causally uses a decoded
+signal. The actor receives current kinematics and task context, so a
+changed physical state is sufficient to make conditions distinguishable.
+This distinction also matters when interpreting decoders of
+motor-cortical activity: condition information should be tested after
+accounting for movement state, and decoding alone does not establish the
+role of that information in generating a correction
+\citep{Nashed2014,Churchland2012,Sadtler2014,Perich2018}.
+A useful next comparison would condition neural decoding on hand state and
+contrast single-time-point with temporally integrated activity.
 
 \paragraph{Limitations.}
 
 Several constraints bound the generality of these conclusions.
 
 \textit{Single training seed.}
-All results are from a single PPO training run.
-We cannot quantify how much of the reported structure (degree of
-dimensionality compression, number of clusters, pattern of decoder
-performance) varies across seeds.
-Systematic multi-seed experiments are needed to establish which features
-are stable properties of the learning algorithm and task, and which are
-idiosyncratic to this particular run.
+All results are from one PPO training run and its best-evaluation
+checkpoint at 800,000 steps. Across eight saved checkpoints, the lateral
+fixed-point locations and relaxation times varied appreciably. Multi-seed
+and checkpoint analyses are needed to establish which aspects of the
+activity geometry and closed-loop stability are reliable properties of
+the task and learning procedure.
 
-\textit{Simplified environment.}
-The two-dimensional point-mass environment abstracts away several features
-that are present in biological reaching: three-dimensional kinematics, muscle
-mechanics, sensory noise, neural delays, and the memory of past perturbations
-(since the MLP has no recurrence).
-Whether the representational organisation we describe here would persist
-in richer, more biologically realistic environments is an open question.
-
-\textit{Feedforward architecture.}
-The absence of recurrence means that the controller processes each
-timestep's observation independently.
-It cannot explicitly maintain an estimate of the perturbation that was
-applied in previous timesteps, which may limit its capacity to generate
-temporally coherent corrections under conditions where the perturbation
-is unpredictable.
+\textit{Simplified environment and feedforward policy.}
+The two-dimensional point-mass environment omits limb and muscle mechanics,
+sensory noise, and neural delays. The feedforward actor processes each
+observation independently and cannot explicitly maintain a temporal
+estimate of a perturbation. These choices make the policy--physics loop
+tractable to analyse, but limit the biological claims and the range of
+corrections the model can represent.
 
 \textit{Descriptive analyses.}
-PCA and linear decoding identify and characterise structure; they do not
-establish which specific hidden units or circuits cause the behaviour.
-Causal interventions would be needed to move from description to mechanism.
+PCA, clustering, and linear decoding describe structure but do not
+identify which hidden units cause behaviour. Likewise, a locally stable
+fixed point does not by itself show that perturbation recovery is caused
+by attraction to that point. Causal interventions and matched-force
+experiments are needed to test these mechanisms.
 
 \textit{Use of AI tools.}
 Large language models were used to support text editing, proofreading,
@@ -1057,80 +844,47 @@ debugging, and \LaTeX\ formatting.
 
 \paragraph{Connecting to biological motor systems.}
 
-Taken together, our results contribute to a growing body of evidence that
-the organisational principles of biological motor populations, namely compact
-manifold geometry, phase-structured latent dynamics, distributed and graded
-encoding of kinematic variables, and linear decodability of task-relevant
-context, are not unique features of biological neural circuits.
-They can emerge spontaneously in artificial controllers trained by
-reinforcement learning, without any architectural constraints or
-biological supervision
-\citep{Churchland2012,Gallego2017,Oby2019,Crevecoeur2019,Silver2016,Haarnoja2018,Mnih2015DQN}.
-This convergence has implications in both directions.
-
-For motor neuroscientists, it suggests that the low-dimensional, phase-structured
-representations observed in motor cortex may be a computationally preferred
-solution to the general problem of generating smooth, goal-directed
-movements under uncertainty, a solution that emerges from optimisation
-pressure rather than from the specific biophysical properties of cortical
-circuits \citep{Franklin2011,WolpertGhahramani2000,Rizzolatti2001,Berniker2011}.
-This raises the possibility of using well-characterised RL controllers
-as computational models for generating testable predictions about
-population dynamics in motor cortex, particularly under novel perturbation
-conditions that are difficult to study in biological experiments.
-
-For engineers and clinicians working on assistive and rehabilitation
-technologies, the framework demonstrates that population-style analysis
-of artificial controller hidden states can reveal mechanistic information
-that task-success metrics alone cannot.
-Understanding which internal states predict failures, and specifically
-which latent configurations mark the transition from successful correction
-to collision, could provide actionable targets for
-improving controller robustness or for designing failure-detection modules
-that flag high-risk states before they produce behavioural errors.
+These results do not show that an artificial hidden layer reproduces motor
+cortex. They show that a relatively simple, feedforward controller can
+exhibit low-dimensional activity and route-specific local stability when
+coupled to physical feedback. This makes it a tractable reference for
+asking which features of population activity arise from task structure,
+which reflect the policy, and which depend on the dynamics of the body and
+environment \citep{Churchland2012,Gallego2017,Oby2019,Crevecoeur2019}.
+For neuroscience, a useful next step is to compare matched perturbations
+across route plans while measuring both movement and population activity,
+and to ask whether condition decoding persists after accounting for hand
+state. For assistive control, the same analyses may eventually help relate
+controller state to failure risk, but that application remains to be
+tested in richer dynamics and across multiple policies.
 
 %==============================================================
 \section{Conclusion}
 %==============================================================
 
-We trained a PPO controller to navigate a reaching-inspired
-obstacle-avoidance task and probed it with graded lateral force
-perturbations spanning both directions, then analysed the internal
-representations of the converged policy using the population-level
-toolkit of motor neuroscience.
+We trained a PPO controller for obstacle avoidance, tested it with
+seven lateral-force conditions, and analysed one hidden layer alongside
+the controller--physics loop. Two principal components explained 70.6\%
+of activity variance, while an episode-held-out decoder identified
+perturbation condition after, but not before, the impulse. At the obstacle
+band, the reduced lateral dynamics had a locally stable fixed point for
+each route cue. These are properties of one feedforward policy and one
+point-mass task, not evidence that artificial units reproduce neural
+activity.
 
-The controller adapted to moderate perturbations through lateral path
-corrections that preserved movement speed, and its robustness failed when a
-strong impulse pushed it toward the obstacle pair, whichever detour it was
-following.
-The hidden-layer activity organised into a compact low-dimensional manifold,
-capturing the large majority of population variance in just two principal
-components, with four phase-aligned clusters shared across all perturbation
-conditions.
-A linear decoder trained on single-timestep hidden-layer activity could
-separate extreme perturbation conditions, while mild conditions were
-geometrically indistinguishable from one another and from the control,
-reflecting similar corrective strategies rather than similar external
-forces.
+The behavioral record is also specific: the strongest tested rightward
+impulse caused collisions on the left route, while all other
+route-by-condition groups succeeded. Since the leftward and rightward
+impulse magnitudes were not matched, we cannot attribute that outcome to
+direction alone. The fixed points describe local lateral stability at a
+fixed forward position; they do not explain the entire reach or establish
+that the executed trajectory follows a moving equilibrium.
 
-These findings demonstrate that reward-driven learning generates internal
-representations with organisational properties, namely low dimensionality,
-phase structure, graded kinematic encoding, and linear decodability of task
-context, that are consistent with those documented in biological motor cortex.
-Population-style analysis of RL controllers provides an analytical window
-that extends beyond behavioural evaluation, offering a path toward
-understanding not just whether an adaptive controller succeeds, but
-mechanistically why it sometimes fails.
-
-Future work will extend this framework to recurrent architectures that
-can maintain temporal estimates of perturbation history, to richer
-three-dimensional environments with contact dynamics, and to systematic
-multi-seed experiments that characterise the variability of the
-representational structure across training runs.
-We also intend to apply these methods to rehabilitation-inspired control
-problems, where linking internal neural representations to behavioural
-recovery outcomes could contribute to the development of more
-interpretable, trustworthy assistive technologies.
+By linking perturbation outcomes to measurable local properties of the
+policy--environment loop, this simple model offers a testable reference for
+asking how feedback helps biological motor systems preserve goal-directed
+action under perturbation, and a starting point for more reliable assistive
+controllers.
 
 %==============================================================
 \section*{Acknowledgments}
